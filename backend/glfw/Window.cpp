@@ -29,8 +29,8 @@ void Window::init(void* pointer, Player* p)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     
-//    desiredResolution = resolutions.back();
-    desiredResolution = {800, 600, 60};
+    desiredResolution = resolutions.back();
+//    desiredResolution = {800, 600, 60};
     
     window = glfwCreateWindow(desiredResolution.width, desiredResolution.height, "game", nullptr, nullptr);
     
@@ -59,6 +59,7 @@ void Window::update()
     
     auto currentTime = std::chrono::high_resolution_clock::now();
     deltaTime = currentTime - previousTime;
+//    std::cout << std::chrono::duration<float>(deltaTime).count() << std::endl;
     
 //    if (deltaTime < FRAME_DURATION)
 //    {
@@ -185,7 +186,7 @@ void Window::handleKeyboardInput(int key, int scancode, int action, int mods)
         
         if (key == GLFW_KEY_SPACE)
         {
-//            toggleFullscreen();
+            toggleFullscreen();
         }
                 
         if (key == GLFW_KEY_W)

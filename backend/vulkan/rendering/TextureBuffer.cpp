@@ -12,10 +12,10 @@ void TextureBuffer::init(DeviceManager* d, VkCommandPool cp)
     deviceManager = d;
     commandPool = cp;
     
-//    createTextureImage("res/models/viking_room.png");
-    createTextureImage("res/textures/brick.jpg");
-    createTextureImage("res/textures/checkerboard.jpg");
-    createTextureImage("res/textures/knight.jpg");
+//    createTextureImage("res/textures/brick.jpg");
+    createTextureImage("res/models/chateau.jpg");
+//    createTextureImage("res/textures/checkerboard.jpg");
+//    createTextureImage("res/textures/knight.jpg");
     createTextureSampler();
 }
 

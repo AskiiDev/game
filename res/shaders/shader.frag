@@ -2,13 +2,18 @@
 
 #define MAX_TEXTURES 16
 layout(set = 0, binding = 1) uniform sampler texSampler;
-layout(set = 0, binding = 2) uniform texture2D textures[16];
+layout(set = 0, binding = 2) uniform texture2D textures[MAX_TEXTURES];
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
 layout(location = 2) flat in uint texIndex;
 
 layout(location = 0) out vec4 outColor;
+
+layout(set = 0, binding = 3) uniform UniformBufferObject {
+    vec2 screenResolution;
+} ubo;
+
 
 const float threshold8x8[64] = float[64](
     0., 48., 12., 60., 3., 51., 15., 63.,
@@ -31,7 +36,7 @@ float bayerDither8x8(vec3 color, int x, int y)
 {
     int index = x + y * 8;
     float threshold = threshold8x8[index] / 64.0;
-    float brightness = dot(vec3(0.2), color);
+    float brightness = dot(vec3(0.2126, 0.7152, 0.0722), color);
     return step(threshold, brightness);
 }
 
@@ -46,8 +51,9 @@ float bayerDither4x4(vec3 color, int x, int y)
 void main()
 {
     vec3 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord).rgb;
+//    outColor = vec4(col, 1.0);
     
-    int stippleSize = 1;
+    float stippleSize = 1;
     
     bool use4x4 = true;
     
@@ -63,6 +69,6 @@ void main()
     }
     
 
-//     outColor = vec4(mix(vec3(0.0), col, dither), 1.0);
+//    outColor = vec4(mix(vec3(0.0), col, dither), 1.0);
     outColor = vec4(dither);
 }
