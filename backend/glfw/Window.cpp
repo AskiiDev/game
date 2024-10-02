@@ -29,8 +29,8 @@ void Window::init(void* pointer, Player* p)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     
-    desiredResolution = resolutions.back();
-//    desiredResolution = {800, 600, 60};
+//    desiredResolution = resolutions.back();
+    desiredResolution = {1280, 832, 60};
     
     window = glfwCreateWindow(desiredResolution.width, desiredResolution.height, "game", nullptr, nullptr);
     

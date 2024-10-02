@@ -1,0 +1,46 @@
+# .envdl 1.0
+
+#def_meta
+lvl_name: "entry"
+author: "Arash Ershadi"
+vers: 1.0
+#end_def_meta
+
+
+#def_lvl
+    #defsec 0
+        #def_verts[4]
+            v0: (2.0, 2.0, 0.0),
+            v1: (3.0, 2.0, 0.0),
+            v2: (3.0, 3.0, 0.0),
+            v3: (2.0, 3.0, 0.0)
+        #end_def_verts
+        
+        #def_indx[2]
+            i0: [v0, v1, v2]
+            i1: [v2, v3, v0]
+        #end_def_indx
+        
+        #def_special
+            light: 0.8
+        #end_def_special
+        
+        #defsec 1
+            #def_verts[4]
+                v0: (4.0, 4.0, 0.0)
+                v1: (5.0, 4.0, 0.0)
+                v2: (5.0, 5.0, 0.0)
+                v3: (4.0, 5.0, 0.0)
+            #end_def_verts
+            
+            #def_indx[2]
+                i0: [v0, v1, v2]
+                i1: [v2, v3, v0]
+            #end_def_indx
+            
+            #def_extra
+                light: 1.0
+            #end_def_extra
+        #end_def_sec
+    #end_def_sec
+#end_lvl

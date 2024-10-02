@@ -10,6 +10,19 @@
 #include "Player.h"
 
 
+struct UniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
+struct PushConstants
+{
+    glm::vec2 resolution;
+};
+
+
 class RenderPipeline {
 private:
     const int MAX_FRAMES_IN_FLIGHT = 2;

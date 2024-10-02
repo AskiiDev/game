@@ -13,14 +13,14 @@ public:
     VkExtent2D swapChainExtent;
     VkFormat swapChainImageFormat;
     
+    Window* window;
+    
     std::vector<VkFramebuffer> swapChainFramebuffers;
     std::vector<VkImageView> swapChainImageViews;
     
 private:
     DeviceManager* deviceManager;
-    Window* window;
     VkSurfaceKHR surface;
-    
     std::vector<VkImage> swapChainImages;
     
 public:
