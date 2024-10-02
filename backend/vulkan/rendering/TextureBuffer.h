@@ -15,7 +15,7 @@ public:
     uint8_t loadedTextures = 0;
     
 private:
-    DeviceManager deviceManager;
+    DeviceManager* deviceManager;
     VkCommandPool commandPool;
     
     uint8_t mipLevels;
@@ -25,7 +25,7 @@ private:
 public:
     TextureBuffer();
     
-    void init(DeviceManager d, VkCommandPool cp);
+    void init(DeviceManager* d, VkCommandPool cp);
     void destroy();
 
 private:

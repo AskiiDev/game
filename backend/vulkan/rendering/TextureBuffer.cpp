@@ -7,7 +7,7 @@ TextureBuffer::TextureBuffer()
 }
 
 
-void TextureBuffer::init(DeviceManager d, VkCommandPool cp)
+void TextureBuffer::init(DeviceManager* d, VkCommandPool cp)
 {
     deviceManager = d;
     commandPool = cp;
@@ -15,7 +15,7 @@ void TextureBuffer::init(DeviceManager d, VkCommandPool cp)
 //    createTextureImage("res/models/viking_room.png");
     createTextureImage("res/textures/brick.jpg");
     createTextureImage("res/textures/checkerboard.jpg");
-    createTextureImage("res/textures/checker.jpg");
+    createTextureImage("res/textures/knight.jpg");
     createTextureSampler();
 }
 
@@ -23,7 +23,7 @@ void TextureBuffer::init(DeviceManager d, VkCommandPool cp)
 void TextureBuffer::createTextureSampler()
 {
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(deviceManager.physicalDevice, &properties);
+    vkGetPhysicalDeviceProperties(deviceManager->physicalDevice, &properties);
     
     VkSamplerCreateInfo samplerInfo{};
     
@@ -46,14 +46,14 @@ void TextureBuffer::createTextureSampler()
     
     textureSampler.resize(textureSampler.size() + 1);
     
-    if (vkCreateSampler(deviceManager.device, &samplerInfo, nullptr, &textureSampler[textureSampler.size() - 1]) != VK_SUCCESS)
+    if (vkCreateSampler(deviceManager->device, &samplerInfo, nullptr, &textureSampler[textureSampler.size() - 1]) != VK_SUCCESS)
         throw std::runtime_error("failed to create texture sampler!");
 }
 
 
 void TextureBuffer::createTextureImageView()
 {
-    textureImageView[loadedTextures] = createImageView(deviceManager.device, textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, mipLevels);
+    textureImageView[loadedTextures] = createImageView(deviceManager->device, textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, mipLevels);
 }
 
 
@@ -71,12 +71,12 @@ void TextureBuffer::createTextureImage(const char* filename)
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
     
-    createBuffer(deviceManager.device, deviceManager.physicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    createBuffer(deviceManager->device, deviceManager->physicalDevice, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
     
     void* data;
-    vkMapMemory(deviceManager.device, stagingBufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(deviceManager->device, stagingBufferMemory, 0, imageSize, 0, &data);
         memcpy(data, pixels, static_cast<size_t>(imageSize));
-    vkUnmapMemory(deviceManager.device, stagingBufferMemory);
+    vkUnmapMemory(deviceManager->device, stagingBufferMemory);
     
     stbi_image_free(pixels);
     
@@ -100,14 +100,14 @@ void TextureBuffer::createTextureImage(const char* filename)
     textureImageView.resize(loadedTextures + 1);
     textureImageMemory.resize(loadedTextures + 1);
     
-    createImage(deviceManager.device, deviceManager.physicalDevice, texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage[loadedTextures], textureImageMemory[loadedTextures]);
+    createImage(deviceManager->device, deviceManager->physicalDevice, texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage[loadedTextures], textureImageMemory[loadedTextures]);
     
-    transitionImageLayout(deviceManager.device, deviceManager.graphicsQueue, commandPool, textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
+    transitionImageLayout(deviceManager->device, deviceManager->graphicsQueue, commandPool, textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
     
     copyBufferToImage(stagingBuffer, textureImage[loadedTextures], static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
     
-    vkDestroyBuffer(deviceManager.device, stagingBuffer, nullptr);
-    vkFreeMemory(deviceManager.device, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(deviceManager->device, stagingBuffer, nullptr);
+    vkFreeMemory(deviceManager->device, stagingBufferMemory, nullptr);
     
     generateMipmaps(textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
     
@@ -121,14 +121,14 @@ void TextureBuffer::createTextureImage(const char* filename)
 void TextureBuffer::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 {
     VkFormatProperties formatProperties;
-    vkGetPhysicalDeviceFormatProperties(deviceManager.physicalDevice, imageFormat, &formatProperties);
+    vkGetPhysicalDeviceFormatProperties(deviceManager->physicalDevice, imageFormat, &formatProperties);
     
     if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
     {
         throw std::runtime_error("texture image format does not support linear blitting!");
     }
     
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(deviceManager.device, commandPool);
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands(deviceManager->device, commandPool);
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -203,13 +203,13 @@ void TextureBuffer::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t
         0, nullptr,
         1, &barrier);
 
-    endSingleTimeCommands(deviceManager.device, deviceManager.graphicsQueue, commandPool, commandBuffer);
+    endSingleTimeCommands(deviceManager->device, deviceManager->graphicsQueue, commandPool, commandBuffer);
 }
 
 
 void TextureBuffer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands(deviceManager.device, commandPool);
+    VkCommandBuffer commandBuffer = beginSingleTimeCommands(deviceManager->device, commandPool);
     
     VkBufferImageCopy region{};
     region.bufferOffset = 0;
@@ -237,7 +237,7 @@ void TextureBuffer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
         &region
     );
 
-    endSingleTimeCommands(deviceManager.device, deviceManager.graphicsQueue, commandPool, commandBuffer);
+    endSingleTimeCommands(deviceManager->device, deviceManager->graphicsQueue, commandPool, commandBuffer);
 }
 
 
@@ -245,10 +245,10 @@ void TextureBuffer::destroy()
 {
     for (int i = 0; i < loadedTextures; ++i)
     {
-        vkDestroySampler(deviceManager.device, textureSampler[i], nullptr);
-        vkDestroyImageView(deviceManager.device, textureImageView[i], nullptr);
-        vkDestroyImage(deviceManager.device, textureImage[i], nullptr);
-        vkFreeMemory(deviceManager.device, textureImageMemory[i], nullptr);
+        vkDestroySampler(deviceManager->device, textureSampler[i], nullptr);
+        vkDestroyImageView(deviceManager->device, textureImageView[i], nullptr);
+        vkDestroyImage(deviceManager->device, textureImage[i], nullptr);
+        vkFreeMemory(deviceManager->device, textureImageMemory[i], nullptr);
     }
     
 }

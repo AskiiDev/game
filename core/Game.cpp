@@ -30,7 +30,7 @@ void Game::initWindow()
 
 void Game::initVulkan()
 {
-    vkManager.init(gameWindow, &player);
+    vkManager.init(&gameWindow, &player);
 }
 
 

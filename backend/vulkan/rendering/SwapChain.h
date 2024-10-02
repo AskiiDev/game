@@ -17,15 +17,15 @@ public:
     std::vector<VkImageView> swapChainImageViews;
     
 private:
-    DeviceManager deviceManager;
-    Window window;
+    DeviceManager* deviceManager;
+    Window* window;
     VkSurfaceKHR surface;
     
     std::vector<VkImage> swapChainImages;
     
 public:
     SwapChain();
-    void init(VkSurfaceKHR s, Window w, DeviceManager d);
+    void init(VkSurfaceKHR s, Window* w, DeviceManager* d);
     void destroy();
     
     void createSwapChain();

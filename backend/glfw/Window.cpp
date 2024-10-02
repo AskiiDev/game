@@ -20,7 +20,7 @@ void Window::init(void* pointer, Player* p)
     
     monitor = glfwGetPrimaryMonitor();
     
-    std::vector<std::array<int, 3>> resolutions = queryResolutions();
+    std::vector<Resolution> resolutions = queryResolutions();
 //    for (auto a : resolutions)
 //    {
 //        printf("%dx%d\n", a[0], a[1]);
@@ -32,14 +32,12 @@ void Window::init(void* pointer, Player* p)
 //    desiredResolution = resolutions.back();
     desiredResolution = {800, 600, 60};
     
-    window = glfwCreateWindow(desiredResolution[0], desiredResolution[1], "game", nullptr, nullptr);
+    window = glfwCreateWindow(desiredResolution.width, desiredResolution.height, "game", nullptr, nullptr);
     
     glfwSetErrorCallback(errorCallback);
     
     glfwSetWindowUserPointer(window, pointer);
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-    
-    game = pointer;
     
     glfwSetKeyCallback(window, keyCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -156,12 +154,12 @@ void Window::toggleFullscreen()
 {
     if (!isFullscreen)
     {
-        glfwSetWindowMonitor(window, monitor, 0, 0, desiredResolution[0], desiredResolution[1], desiredResolution[2]);
+        glfwSetWindowMonitor(window, monitor, 0, 0, desiredResolution.width, desiredResolution.height, desiredResolution.refreshRate);
         //                glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
     }
     else
     {
-        glfwSetWindowMonitor(window, NULL, 100, 100, desiredResolution[0], desiredResolution[1], 0);
+        glfwSetWindowMonitor(window, NULL, 100, 100, desiredResolution.width, desiredResolution.height, 0);
         //                glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     }
     
@@ -232,9 +230,9 @@ void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height
 }
 
 
-std::vector<std::array<int, 3>> Window::queryResolutions()
+std::vector<Resolution> Window::queryResolutions()
 {
-    std::vector<std::array<int, 3>> resolutions;
+    std::vector<Resolution> resolutions;
     
     int count;
     const GLFWvidmode* modes = glfwGetVideoModes(monitor, &count);
@@ -245,7 +243,14 @@ std::vector<std::array<int, 3>> Window::queryResolutions()
 //    printf("%fx%f\n", xScale, yScale);
 
     for (int i = 0; i < count; i++)
-        resolutions.push_back( {(int) (modes[i].width / xScale), (int) (modes[i].height / yScale), modes[i].refreshRate} );
+    {
+        Resolution r;
+        r.width = (int) (modes[i].width / xScale);
+        r.height = (int) (modes[i].height / yScale);
+        r.refreshRate = modes[i].refreshRate;
+        
+        resolutions.push_back(r);
+    }
     
     return resolutions;
 }

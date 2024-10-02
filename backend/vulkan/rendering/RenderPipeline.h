@@ -20,8 +20,8 @@ private:
     VkDeviceMemory colorImageMemory;
     VkImageView colorImageView;
     
-    DeviceManager deviceManager;
-    SwapChain swapChain;
+    DeviceManager* deviceManager;
+    SwapChain* swapChain;
     VkDevice device;
     Player* player;
     
@@ -53,7 +53,7 @@ private:
     
 public:
     RenderPipeline();
-    void init(DeviceManager d, SwapChain s, Player* p);
+    void init(DeviceManager* d, SwapChain* s, Player* p);
     void drawFrame();
     void destroy();
     void destroyDepthBuffer();

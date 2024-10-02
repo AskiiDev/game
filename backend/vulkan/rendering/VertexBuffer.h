@@ -88,11 +88,11 @@ private:
     VkDeviceMemory indexBufferMemory;
     
     VkCommandPool commandPool;
-    DeviceManager deviceManager;
+    DeviceManager* deviceManager;
     
 public:
     VertexBuffer();
-    void init(DeviceManager d, VkCommandPool cp);
+    void init(DeviceManager* d, VkCommandPool cp);
     void destroy();
     
 private:

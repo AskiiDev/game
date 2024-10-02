@@ -15,7 +15,7 @@ VertexBuffer::VertexBuffer()
 }
 
 
-void VertexBuffer::init(DeviceManager d, VkCommandPool cp)
+void VertexBuffer::init(DeviceManager* d, VkCommandPool cp)
 {
     deviceManager = d;
     commandPool = cp;
@@ -42,10 +42,10 @@ void VertexBuffer::loadModel()
         {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0}, // Bottom-left
 
         // Left face
-        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 2}, // Bottom-left
-        {{-0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}, 2},  // Bottom-right
-        {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, 2},   // Top-right
-        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}, 2},  // Top-left
+        {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}, 2}, // Bottom-left
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}, 2},  // Bottom-right
+        {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, 2},   // Top-right
+        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}, 2},  // Top-left
 
         // Right face
         {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}, 0},   // Bottom-left
@@ -130,19 +130,19 @@ void VertexBuffer::createIndexBuffer()
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    createBuffer(deviceManager.device, deviceManager.physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    createBuffer(deviceManager->device, deviceManager->physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
-    vkMapMemory(deviceManager.device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(deviceManager->device, stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, indices.data(), (size_t) bufferSize);
-    vkUnmapMemory(deviceManager.device, stagingBufferMemory);
+    vkUnmapMemory(deviceManager->device, stagingBufferMemory);
 
-    createBuffer(deviceManager.device, deviceManager.physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
+    createBuffer(deviceManager->device, deviceManager->physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 
-    copyBuffer(deviceManager.device, deviceManager.graphicsQueue, commandPool, stagingBuffer, indexBuffer, bufferSize);
+    copyBuffer(deviceManager->device, deviceManager->graphicsQueue, commandPool, stagingBuffer, indexBuffer, bufferSize);
 
-    vkDestroyBuffer(deviceManager.device, stagingBuffer, nullptr);
-    vkFreeMemory(deviceManager.device, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(deviceManager->device, stagingBuffer, nullptr);
+    vkFreeMemory(deviceManager->device, stagingBufferMemory, nullptr);
 }
 
 
@@ -152,27 +152,27 @@ void VertexBuffer::createVertexBuffer()
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    createBuffer(deviceManager.device, deviceManager.physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    createBuffer(deviceManager->device, deviceManager->physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
-    vkMapMemory(deviceManager.device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(deviceManager->device, stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, vertices.data(), (size_t) bufferSize);
-    vkUnmapMemory(deviceManager.device, stagingBufferMemory);
+    vkUnmapMemory(deviceManager->device, stagingBufferMemory);
 
-    createBuffer(deviceManager.device, deviceManager.physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
+    createBuffer(deviceManager->device, deviceManager->physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
     
-    copyBuffer(deviceManager.device, deviceManager.graphicsQueue, commandPool, stagingBuffer, vertexBuffer, bufferSize);
+    copyBuffer(deviceManager->device, deviceManager->graphicsQueue, commandPool, stagingBuffer, vertexBuffer, bufferSize);
     
-    vkDestroyBuffer(deviceManager.device, stagingBuffer, nullptr);
-    vkFreeMemory(deviceManager.device, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(deviceManager->device, stagingBuffer, nullptr);
+    vkFreeMemory(deviceManager->device, stagingBufferMemory, nullptr);
 }
 
 
 void VertexBuffer::destroy()
 {
-    vkDestroyBuffer(deviceManager.device, indexBuffer, nullptr);
-    vkFreeMemory(deviceManager.device, indexBufferMemory, nullptr);
+    vkDestroyBuffer(deviceManager->device, indexBuffer, nullptr);
+    vkFreeMemory(deviceManager->device, indexBufferMemory, nullptr);
     
-    vkDestroyBuffer(deviceManager.device, vertexBuffer, nullptr);
-    vkFreeMemory(deviceManager.device, vertexBufferMemory, nullptr);
+    vkDestroyBuffer(deviceManager->device, vertexBuffer, nullptr);
+    vkFreeMemory(deviceManager->device, vertexBufferMemory, nullptr);
 }

@@ -7,6 +7,13 @@
 #include <chrono>
 
 
+struct Resolution
+{
+    uint16_t width;
+    uint16_t height;
+    uint16_t refreshRate = 60;
+};
+
 
 const int TARGET_FPS = 30;
 const std::chrono::duration<double> FRAME_DURATION(1.0 / TARGET_FPS);
@@ -26,8 +33,6 @@ private:
 public:
     GLFWwindow* window;
     GLFWmonitor* monitor;
-
-    void *game;
     
     float mouseSensitivity = 0.12f;
     
@@ -36,7 +41,7 @@ public:
     bool updatingCursor = false;
     
     bool isFullscreen = false;
-    std::array<int, 3> desiredResolution;
+    Resolution desiredResolution;
     
 public:
     Window();
@@ -46,7 +51,7 @@ public:
     void destroy();
     
     bool isRunning() { return !glfwWindowShouldClose(window); };
-    std::vector<std::array<int, 3>> queryResolutions();
+    std::vector<Resolution> queryResolutions();
     
 private:
     static void errorCallback(int error, const char* description);

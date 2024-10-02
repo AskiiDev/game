@@ -6,7 +6,7 @@ SwapChain::SwapChain()
 }
 
 
-void SwapChain::init(VkSurfaceKHR s, Window w, DeviceManager d)
+void SwapChain::init(VkSurfaceKHR s, Window* w, DeviceManager* d)
 {
     window = w;
     surface = s;
@@ -20,21 +20,20 @@ void SwapChain::init(VkSurfaceKHR s, Window w, DeviceManager d)
 void SwapChain::reconstructChain()
 {
     int width = 0, height = 0;
-    glfwGetFramebufferSize(window.window, &width, &height);
+    glfwGetFramebufferSize(window->window, &width, &height);
     while (width == 0 || height == 0)
     {
-        glfwGetFramebufferSize(window.window, &width, &height);
+        glfwGetFramebufferSize(window->window, &width, &height);
         glfwWaitEvents();
     }
     
-    vkDeviceWaitIdle(deviceManager.device);
     destroy();
 }
 
 
 void SwapChain::createSwapChain()
 {
-    SwapChainSupportDetails swapChainSupport = deviceManager.querySwapChainSupport(deviceManager.physicalDevice);
+    SwapChainSupportDetails swapChainSupport = deviceManager->querySwapChainSupport(deviceManager->physicalDevice);
     
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -57,7 +56,7 @@ void SwapChain::createSwapChain()
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     
-    QueueFamilyIndices indices = deviceManager.findQueueFamilies(deviceManager.physicalDevice);
+    QueueFamilyIndices indices = deviceManager->findQueueFamilies(deviceManager->physicalDevice);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -76,13 +75,13 @@ void SwapChain::createSwapChain()
     createInfo.clipped = VK_TRUE;
     createInfo.oldSwapchain = VK_NULL_HANDLE;
     
-    if (vkCreateSwapchainKHR(deviceManager.device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(deviceManager->device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
         throw std::runtime_error("failed to create swap chain!");
     }
     
-    vkGetSwapchainImagesKHR(deviceManager.device, swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(deviceManager->device, swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(deviceManager.device, swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(deviceManager->device, swapChain, &imageCount, swapChainImages.data());
     
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
@@ -112,8 +111,8 @@ VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfac
 
 VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 {
-    int width = window.desiredResolution[0];
-    int height = window.desiredResolution[1];
+    int width = window->desiredResolution.width;
+    int height = window->desiredResolution.height;
     
     VkExtent2D actualExtent = {
         static_cast<uint32_t>(width),
@@ -130,7 +129,7 @@ VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
 
 void SwapChain::createImageViews() {
     swapChainImageViews.resize(swapChainImages.size());
-    VkDevice device = deviceManager.device;
+    VkDevice device = deviceManager->device;
     
     for (uint32_t i = 0; i < swapChainImages.size(); i++)
         swapChainImageViews[i] = createImageView(device, swapChainImages[i], swapChainImageFormat, 1);
@@ -141,13 +140,13 @@ void SwapChain::destroy()
 {
     
     for (auto framebuffer : swapChainFramebuffers)
-        vkDestroyFramebuffer(deviceManager.device, framebuffer, nullptr);
+        vkDestroyFramebuffer(deviceManager->device, framebuffer, nullptr);
     
     for (auto imageView : swapChainImageViews)
-        vkDestroyImageView(deviceManager.device, imageView, nullptr);
+        vkDestroyImageView(deviceManager->device, imageView, nullptr);
     
     swapChainImageViews.clear();
     swapChainFramebuffers.clear();
     
-    vkDestroySwapchainKHR(deviceManager.device, swapChain, nullptr);
+    vkDestroySwapchainKHR(deviceManager->device, swapChain, nullptr);
 }

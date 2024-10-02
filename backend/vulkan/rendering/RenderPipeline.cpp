@@ -13,11 +13,11 @@ RenderPipeline::RenderPipeline()
 }
 
 
-void RenderPipeline::init(DeviceManager d, SwapChain s, Player* p)
+void RenderPipeline::init(DeviceManager* d, SwapChain* s, Player* p)
 {
     deviceManager = d;
     swapChain = s;
-    device = d.device;
+    device = d->device;
     player = p;
     
     msaaSamples = VK_SAMPLE_COUNT_2_BIT;
@@ -37,13 +37,13 @@ void RenderPipeline::init(DeviceManager d, SwapChain s, Player* p)
     textureBuffer.init(deviceManager, commandPool);
     vertexBuffer.init(deviceManager, commandPool);
     
-    createDescriptorSetLayout();
-    createRenderPipeline();
-    
     createUniformBuffers();
     
+    createDescriptorSetLayout();
     createDescriptorPool();
     createDescriptorSets();
+    
+    createRenderPipeline();
     
     createCommandBuffers();
     
@@ -183,7 +183,7 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 //    printf("%f\n", player.camera.yaw);
     ubo.view = glm::lookAt(player->camera.worldLocation, player->camera.worldLocation + player->camera.forwardVector, player->camera.upVector);
         
-    ubo.proj = glm::perspective(glm::radians(45.0f), swapChain.swapChainExtent.width / (float) swapChain.swapChainExtent.height, 0.1f, 10.0f);
+    ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.1f, 10.0f);
     
     ubo.proj[1][1] *= -1;
 
@@ -201,7 +201,7 @@ void RenderPipeline::createUniformBuffers()
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        createBuffer(device, deviceManager.physicalDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+        createBuffer(device, deviceManager->physicalDevice, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
 
         vkMapMemory(device, uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
     }
@@ -239,16 +239,16 @@ void RenderPipeline::drawFrame()
     vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(device, swapChain.swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(device, swapChain->swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
     
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
         destroyColorResources();
         destroyDepthBuffer();
         
-        swapChain.reconstructChain();
-        swapChain.createSwapChain();
-        swapChain.createImageViews();
+        swapChain->reconstructChain();
+        swapChain->createSwapChain();
+        swapChain->createImageViews();
         
         createColorResources();
         createDepthResources();
@@ -288,7 +288,7 @@ void RenderPipeline::drawFrame()
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
     
-    if (vkQueueSubmit(deviceManager.graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+    if (vkQueueSubmit(deviceManager->graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
         throw std::runtime_error("failed to submit draw command buffer!");
     
     VkPresentInfoKHR presentInfo{};
@@ -297,13 +297,13 @@ void RenderPipeline::drawFrame()
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
     
-    VkSwapchainKHR swapChains[] = { swapChain.swapChain };
+    VkSwapchainKHR swapChains[] = { swapChain->swapChain };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
     
     presentInfo.pResults = nullptr;
-    result = vkQueuePresentKHR(deviceManager.presentQueue, &presentInfo);
+    result = vkQueuePresentKHR(deviceManager->presentQueue, &presentInfo);
     
     if (result == VK_ERROR_OUT_OF_DATE_KHR || framebufferResized)
     {
@@ -312,9 +312,9 @@ void RenderPipeline::drawFrame()
         destroyColorResources();
         destroyDepthBuffer();
         
-        swapChain.reconstructChain();
-        swapChain.createSwapChain();
-        swapChain.createImageViews();
+        swapChain->reconstructChain();
+        swapChain->createSwapChain();
+        swapChain->createImageViews();
         
         createColorResources();
         createDepthResources();
@@ -343,9 +343,9 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = swapChain.swapChainFramebuffers[imageIndex];
+    renderPassInfo.framebuffer = swapChain->swapChainFramebuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapChain.swapChainExtent;
+    renderPassInfo.renderArea.extent = swapChain->swapChainExtent;
 
     std::array<VkClearValue, 2> clearValues{};
     clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
@@ -361,15 +361,15 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float) swapChain.swapChainExtent.width;
-    viewport.height = (float) swapChain.swapChainExtent.height;
+    viewport.width = (float) swapChain->swapChainExtent.width;
+    viewport.height = (float) swapChain->swapChainExtent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapChain.swapChainExtent;
+    scissor.extent = swapChain->swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
     VkBuffer vertexBuffers[] = { vertexBuffer.vertexBuffer };
@@ -415,7 +415,7 @@ void RenderPipeline::createCommandBuffers()
 
 void RenderPipeline::createCommandPool()
 {
-    QueueFamilyIndices queueFamilyIndices = deviceManager.findQueueFamilies(deviceManager.physicalDevice);
+    QueueFamilyIndices queueFamilyIndices = deviceManager->findQueueFamilies(deviceManager->physicalDevice);
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -432,7 +432,7 @@ void RenderPipeline::createCommandPool()
 void RenderPipeline::createRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapChain.swapChainImageFormat;
+    colorAttachment.format = swapChain->swapChainImageFormat;
     colorAttachment.samples = msaaSamples;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -442,7 +442,7 @@ void RenderPipeline::createRenderPass()
     colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     
     VkAttachmentDescription colorAttachmentResolve{};
-    colorAttachmentResolve.format = swapChain.swapChainImageFormat;
+    colorAttachmentResolve.format = swapChain->swapChainImageFormat;
     colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -452,7 +452,7 @@ void RenderPipeline::createRenderPass()
     colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     
     VkAttachmentDescription depthAttachment{};
-    depthAttachment.format = findDepthFormat(deviceManager.physicalDevice);
+    depthAttachment.format = findDepthFormat(deviceManager->physicalDevice);
     depthAttachment.samples = msaaSamples;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -657,15 +657,15 @@ VkShaderModule RenderPipeline::createShaderModule(const std::vector<char>& code)
 
 void RenderPipeline::createFramebuffers()
 {
-    auto viewSize = swapChain.swapChainImageViews.size();
-    swapChain.swapChainFramebuffers.resize(viewSize);
+    auto viewSize = swapChain->swapChainImageViews.size();
+    swapChain->swapChainFramebuffers.resize(viewSize);
     
     for (size_t i = 0; i < viewSize; i++)
     {
         std::array<VkImageView, 3> attachments = {
             colorImageView,
             depthImageView,
-            swapChain.swapChainImageViews[i]
+            swapChain->swapChainImageViews[i]
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -673,11 +673,11 @@ void RenderPipeline::createFramebuffers()
         framebufferInfo.renderPass = renderPass;
         framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         framebufferInfo.pAttachments = attachments.data();
-        framebufferInfo.width = swapChain.swapChainExtent.width;
-        framebufferInfo.height = swapChain.swapChainExtent.height;
+        framebufferInfo.width = swapChain->swapChainExtent.width;
+        framebufferInfo.height = swapChain->swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChain.swapChainFramebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChain->swapChainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
@@ -686,20 +686,20 @@ void RenderPipeline::createFramebuffers()
 
 void RenderPipeline::createDepthResources()
 {
-    VkFormat depthFormat = findDepthFormat(deviceManager.physicalDevice);
+    VkFormat depthFormat = findDepthFormat(deviceManager->physicalDevice);
     
-    createImage(device, deviceManager.physicalDevice, swapChain.swapChainExtent.width, swapChain.swapChainExtent.height, 1, msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
+    createImage(device, deviceManager->physicalDevice, swapChain->swapChainExtent.width, swapChain->swapChainExtent.height, 1, msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
     
     depthImageView = createImageView(device, depthImage, depthFormat, 1, VK_IMAGE_ASPECT_DEPTH_BIT);
 
-    transitionImageLayout(deviceManager.device, deviceManager.graphicsQueue, commandPool, depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
+    transitionImageLayout(deviceManager->device, deviceManager->graphicsQueue, commandPool, depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 }
 
 
 void RenderPipeline::createColorResources() {
-    VkFormat colorFormat = swapChain.swapChainImageFormat;
+    VkFormat colorFormat = swapChain->swapChainImageFormat;
 
-    createImage(device, deviceManager.physicalDevice, swapChain.swapChainExtent.width, swapChain.swapChainExtent.height, 1, msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory);
+    createImage(device, deviceManager->physicalDevice, swapChain->swapChainExtent.width, swapChain->swapChainExtent.height, 1, msaaSamples, colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory);
     colorImageView = createImageView(device, colorImage, colorFormat, 1, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
@@ -707,7 +707,7 @@ void RenderPipeline::createColorResources() {
 VkSampleCountFlagBits RenderPipeline::getMaxUsableSampleCount()
 {
     VkPhysicalDeviceProperties physicalDeviceProperties;
-    vkGetPhysicalDeviceProperties(deviceManager.physicalDevice, &physicalDeviceProperties);
+    vkGetPhysicalDeviceProperties(deviceManager->physicalDevice, &physicalDeviceProperties);
 
     VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
     if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
