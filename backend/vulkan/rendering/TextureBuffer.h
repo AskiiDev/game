@@ -10,16 +10,17 @@
 
 class TextureBuffer {
 public:
-    VkImageView textureImageView;
-    VkSampler textureSampler;
+    std::vector<VkImageView> textureImageView;
+    std::vector<VkSampler> textureSampler;
+    uint8_t loadedTextures = 0;
     
 private:
     DeviceManager deviceManager;
     VkCommandPool commandPool;
     
     uint8_t mipLevels;
-    VkImage textureImage;
-    VkDeviceMemory textureImageMemory;
+    std::vector<VkImage> textureImage;
+    std::vector<VkDeviceMemory> textureImageMemory;
     
 public:
     TextureBuffer();

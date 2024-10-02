@@ -12,9 +12,10 @@ void TextureBuffer::init(DeviceManager d, VkCommandPool cp)
     deviceManager = d;
     commandPool = cp;
     
-    createTextureImage("res/models/viking_room.png");
-//    createTextureImage("res/textures/brick.jpg");
-    createTextureImageView();
+//    createTextureImage("res/models/viking_room.png");
+    createTextureImage("res/textures/brick.jpg");
+    createTextureImage("res/textures/checkerboard.jpg");
+    createTextureImage("res/textures/checker.jpg");
     createTextureSampler();
 }
 
@@ -41,16 +42,18 @@ void TextureBuffer::createTextureSampler()
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.minLod = 0;
-    samplerInfo.maxLod = static_cast<float>(mipLevels);
+    samplerInfo.maxLod = 10;
     
-    if (vkCreateSampler(deviceManager.device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
+    textureSampler.resize(textureSampler.size() + 1);
+    
+    if (vkCreateSampler(deviceManager.device, &samplerInfo, nullptr, &textureSampler[textureSampler.size() - 1]) != VK_SUCCESS)
         throw std::runtime_error("failed to create texture sampler!");
 }
 
 
 void TextureBuffer::createTextureImageView()
 {
-    textureImageView = createImageView(deviceManager.device, textureImage, VK_FORMAT_R8G8B8A8_SRGB, mipLevels);
+    textureImageView[loadedTextures] = createImageView(deviceManager.device, textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, mipLevels);
 }
 
 
@@ -58,12 +61,10 @@ void TextureBuffer::createTextureImage(const char* filename)
 {
     int texWidth, texHeight, texChannels;
     stbi_uc* pixels = stbi_load(filename, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        VkDeviceSize imageSize = texWidth * texHeight * 4;
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
     
     mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
-//    printf("%d\n", mipLevels);
-//    mipLevels = 1;
-    
+
     if (!pixels)
         throw std::runtime_error("failed to load texture image!");
     
@@ -94,19 +95,26 @@ void TextureBuffer::createTextureImage(const char* filename)
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     
-    createImage(deviceManager.device, deviceManager.physicalDevice, texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
     
+    textureImage.resize(loadedTextures + 1);
+    textureImageView.resize(loadedTextures + 1);
+    textureImageMemory.resize(loadedTextures + 1);
     
-    transitionImageLayout(deviceManager.device, deviceManager.graphicsQueue, commandPool, textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
+    createImage(deviceManager.device, deviceManager.physicalDevice, texWidth, texHeight, mipLevels, VK_SAMPLE_COUNT_1_BIT, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage[loadedTextures], textureImageMemory[loadedTextures]);
     
-    copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+    transitionImageLayout(deviceManager.device, deviceManager.graphicsQueue, commandPool, textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
     
-//    transitionImageLayout(deviceManager.device, deviceManager.graphicsQueue, commandPool, textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
+    copyBufferToImage(stagingBuffer, textureImage[loadedTextures], static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
     
     vkDestroyBuffer(deviceManager.device, stagingBuffer, nullptr);
     vkFreeMemory(deviceManager.device, stagingBufferMemory, nullptr);
     
-    generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
+    generateMipmaps(textureImage[loadedTextures], VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
+    
+    createTextureImageView();
+//    createTextureSampler();
+    
+    loadedTextures++;
 }
 
 
@@ -235,8 +243,12 @@ void TextureBuffer::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t w
 
 void TextureBuffer::destroy()
 {
-    vkDestroySampler(deviceManager.device, textureSampler, nullptr);
-    vkDestroyImageView(deviceManager.device, textureImageView, nullptr);
-    vkDestroyImage(deviceManager.device, textureImage, nullptr);
-    vkFreeMemory(deviceManager.device, textureImageMemory, nullptr);
+    for (int i = 0; i < loadedTextures; ++i)
+    {
+        vkDestroySampler(deviceManager.device, textureSampler[i], nullptr);
+        vkDestroyImageView(deviceManager.device, textureImageView[i], nullptr);
+        vkDestroyImage(deviceManager.device, textureImage[i], nullptr);
+        vkFreeMemory(deviceManager.device, textureImageMemory[i], nullptr);
+    }
+    
 }

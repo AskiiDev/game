@@ -1,9 +1,12 @@
 #version 450
 
-layout(binding = 1) uniform sampler2D texSampler;
+#define MAX_TEXTURES 16
+layout(set = 0, binding = 1) uniform sampler texSampler;
+layout(set = 0, binding = 2) uniform texture2D textures[16];
 
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
+layout(location = 2) flat in uint texIndex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -42,7 +45,7 @@ float bayerDither4x4(vec3 color, int x, int y)
 
 void main()
 {
-    vec3 col = texture(texSampler, fragTexCoord).rgb;
+    vec3 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord).rgb;
     
     int stippleSize = 1;
     
