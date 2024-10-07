@@ -9,6 +9,7 @@ Game::Game()
 
 void Game::run()
 {
+    world.load();
     player.init();
     
     initWindow();
@@ -30,7 +31,7 @@ void Game::initWindow()
 
 void Game::initVulkan()
 {
-    vkManager.init(&gameWindow, &player);
+    vkManager.init(&gameWindow, &player, &world);
 }
 
 

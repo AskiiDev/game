@@ -5,10 +5,12 @@
 #include "VulkanManager.h"
 #include "AudioManager.h"
 #include "Player.h"
+#include "World.h"
 
 
 class Game {
 public:
+    World world;
     Player player;
     VulkanManager vkManager;
     Window gameWindow;

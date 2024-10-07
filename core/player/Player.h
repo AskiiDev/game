@@ -33,7 +33,10 @@ public:
     uint8_t mvDirection = 0;
     
 private:
-    float playerSpeed = 2.f;
+    glm::vec3 playerVelocity = glm::vec3(0, 0, 0);
+    float acceleration = 5.0f;
+    float deceleration = 15.0f;
+    float playerSpeed = 1.2f;
     
 public:
     Player();

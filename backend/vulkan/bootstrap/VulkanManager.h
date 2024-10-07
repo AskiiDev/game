@@ -8,6 +8,7 @@
 #include "Window.h"
 #include "Surface.h"
 #include "Player.h"
+#include "World.h"
 
 
 class VulkanManager {
@@ -23,7 +24,7 @@ private:
     
 public:
     VulkanManager();
-    void init(Window* window, Player* p);
+    void init(Window* window, Player* p, World* w);
     void destroy();
     void draw();
     void idle();

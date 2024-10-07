@@ -13,20 +13,18 @@ RenderPipeline::RenderPipeline()
 }
 
 
-void RenderPipeline::init(DeviceManager* d, SwapChain* s, Player* p)
+void RenderPipeline::init(DeviceManager* d, SwapChain* s, Player* p, World* w)
 {
     deviceManager = d;
     swapChain = s;
     device = d->device;
     player = p;
+    world = w;
     
     msaaSamples = VK_SAMPLE_COUNT_2_BIT;
 //    msaaSamples = getMaxUsableSampleCount();
     
     createRenderPass();
-    
-    
-    
     createCommandPool();
     
     createColorResources();
@@ -177,13 +175,12 @@ void RenderPipeline::createDescriptorSetLayout()
 void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 {
     UniformBufferObject ubo{};
+
+    ubo.model = world->getWorldActors()[0].getModelMatrix();
     
-    ubo.model = glm::rotate(glm::mat4(1.f), glm::radians(180.f), glm::vec3(0.0f, 1.0f, 1.0f));
-    
-//    printf("%f\n", player.camera.yaw);
     ubo.view = glm::lookAt(player->camera.worldLocation, player->camera.worldLocation + player->camera.forwardVector, player->camera.upVector);
         
-    ubo.proj = glm::perspective(glm::radians(45.0f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.1f, 10.0f);
+    ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 10.0f);
     
     ubo.proj[1][1] *= -1;
 
@@ -358,16 +355,16 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
     
-    PushConstants p;
-    p.resolution = glm::vec2(swapChain->window->desiredResolution.width, swapChain->window->desiredResolution.height);
+    PushConstants push;
+    push.resolution = glm::vec2(swapChain->window->desiredResolution.width, swapChain->window->desiredResolution.height);
     
     vkCmdPushConstants(
         commandBuffer,
         pipelineLayout,
         VK_SHADER_STAGE_FRAGMENT_BIT,
         0,
-        sizeof(PushConstants),
-        &p
+        sizeof(push),
+        &push
     );
 
     VkViewport viewport{};

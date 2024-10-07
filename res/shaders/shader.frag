@@ -11,6 +11,7 @@ layout(set = 0, binding = 2) uniform texture2D textures[MAX_TEXTURES];
 layout(location = 0) in vec3 fragColor;
 layout(location = 1) in vec2 fragTexCoord;
 layout(location = 2) flat in uint texIndex;
+
 layout(location = 0) out vec4 outColor;
 
 const float threshold4x4[16] = float[16](
@@ -31,7 +32,13 @@ float bayerDither4x4(vec3 color, int x, int y)
 
 void main()
 {
-    vec3 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord).rgb;
+    float pixelationFactor = 512.0;
+
+    // Get the texture coordinates and adjust them to achieve the pixelation effect
+    vec2 pixelatedCoords = floor(fragTexCoord * pixelationFactor) / pixelationFactor;
+
+    // Sample the texture using the pixelated coordinates
+    vec4 col = texture(sampler2D(textures[texIndex], texSampler), pixelatedCoords);
 //    outColor = vec4(col, 1.0);
     
     float dither;
@@ -39,5 +46,9 @@ void main()
     int x = int(gl_FragCoord.x) % 4;
     int y = int(gl_FragCoord.y) % 4;
     
-    outColor = vec4(vec3(bayerDither4x4(col, x, y)), 1.0);
+    vec4 bayer = vec4(vec3(bayerDither4x4(col.rgb, x, y)), 1.0);
+    
+    outColor = bayer/* * pow(col, vec4(0.9))*/;
+//    outColor *= 2;
+//    outColor = bayer;
 }

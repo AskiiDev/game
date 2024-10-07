@@ -14,14 +14,14 @@ VulkanManager::VulkanManager()
 }
 
 
-void VulkanManager::init(Window* window, Player* p)
+void VulkanManager::init(Window* window, Player* p, World* w)
 {
     createInstance();
 
     surface.init(instance, window->window);
     deviceManager.init(instance, surface, window->window);
     swapChain.init(surface.surface, window, &deviceManager);
-    renderPipeline.init(&deviceManager, &swapChain, p);
+    renderPipeline.init(&deviceManager, &swapChain, p, w);
 }
 
 

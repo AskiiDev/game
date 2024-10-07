@@ -13,16 +13,16 @@ Player::Player()
 
 void Player::init()
 {
-    camera.worldLocation = glm::vec3(0.f, 0.f, 1.f);
+    camera.worldLocation = glm::vec3(0.f, 0.3f, 0.f);
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
-    camera.yaw = -90.f;
+    camera.yaw = -220.f;
     camera.pitch = 0.f;
-    
-    updateCameraVectors();
+
     updateCameraVectors();
 }
+
 
 void Player::updateCameraVectors()
 {
@@ -32,6 +32,7 @@ void Player::updateCameraVectors()
     fV.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
     
     camera.forwardVector = glm::normalize(fV);
+    
     camera.rightVector = glm::normalize(glm::cross(camera.forwardVector, camera.worldUpVector));
     camera.upVector = glm::normalize(glm::cross(camera.rightVector, camera.forwardVector));
 }
@@ -39,35 +40,50 @@ void Player::updateCameraVectors()
 
 void Player::updatePlayerMovement(float deltaTime)
 {
-    float velocity = playerSpeed * deltaTime;
+    glm::vec3 mask = glm::vec3(1, 1, 1);
     
-    glm::vec3 forwardDelta = camera.forwardVector * velocity;
-    glm::vec3 rightDelta = camera.rightVector * velocity;
-    glm::vec3 totalMovement = glm::vec3(0.0f);
+    glm::vec3 forwardDelta = camera.forwardVector * mask;
+    glm::vec3 rightDelta = camera.rightVector * mask;
+    
+    glm::vec3 desiredMovement = glm::vec3(0.0f);
+    
     
     if (mvDirection & MV_FORWARD)
     {
-        totalMovement += forwardDelta;
+        desiredMovement += forwardDelta;
     }
         
     if (mvDirection & MV_BACKWARD)
     {
-        totalMovement -= forwardDelta;
+        desiredMovement -= forwardDelta;
     }
         
     if (mvDirection & MV_LEFT)
     {
-        totalMovement -= rightDelta;
+        desiredMovement -= rightDelta;
     }
         
     if (mvDirection & MV_RIGHT)
     {
-        totalMovement += rightDelta;
+        desiredMovement += rightDelta;
     }
-    
-    if (totalMovement != glm::vec3(0.0f))
+
+    if (glm::length(desiredMovement) > 0.0f)
     {
-        totalMovement = glm::normalize(totalMovement) * velocity;
-        camera.worldLocation += totalMovement;
+        desiredMovement = glm::normalize(desiredMovement);
     }
+
+    glm::vec3 targetVelocity = desiredMovement * playerSpeed;
+
+    if (glm::length(targetVelocity) > 0.0f)
+    {
+        playerVelocity = glm::mix(playerVelocity, targetVelocity, acceleration * deltaTime);
+    }
+    else
+    {
+        playerVelocity = glm::mix(playerVelocity, glm::vec3(0.0f), deceleration * deltaTime);
+    }
+
+    camera.worldLocation += playerVelocity * deltaTime;
 }
+

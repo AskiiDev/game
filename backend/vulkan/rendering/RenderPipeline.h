@@ -8,6 +8,7 @@
 #include "TextureBuffer.h"
 #include "SwapChain.h"
 #include "Player.h"
+#include "World.h"
 
 
 struct UniformBufferObject
@@ -37,6 +38,7 @@ private:
     SwapChain* swapChain;
     VkDevice device;
     Player* player;
+    World* world;
     
     VkImage depthImage;
     VkDeviceMemory depthImageMemory;
@@ -66,7 +68,7 @@ private:
     
 public:
     RenderPipeline();
-    void init(DeviceManager* d, SwapChain* s, Player* p);
+    void init(DeviceManager* d, SwapChain* s, Player* p, World* w);
     void drawFrame();
     void destroy();
     void destroyDepthBuffer();
