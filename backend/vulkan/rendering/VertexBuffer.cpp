@@ -22,15 +22,11 @@ void VertexBuffer::populateBuffers()
 {
     Object obj = loadObject("res/models/viking_room.obj");
     
-    
     for (const Vertex& v : obj.vertices)
         vertices.push_back(v);
     
     for (const uint32_t i : obj.indices)
         indices.push_back(i);
-    
-    std::cout << vertices.size() << std::endl;
-    std::cout << indices.size() << std::endl;
 }
 
 

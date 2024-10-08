@@ -172,11 +172,11 @@ void RenderPipeline::createDescriptorSetLayout()
 }
 
 
-void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
+void RenderPipeline::updateUniformBuffer(uint32_t currentImage, glm::mat4 model)
 {
     UniformBufferObject ubo{};
 
-    ubo.model = world->getWorldActors()[0].getModelMatrix();
+    ubo.model = model;
     
     ubo.view = glm::lookAt(player->camera.worldLocation, player->camera.worldLocation + player->camera.forwardVector, player->camera.upVector);
         
@@ -258,7 +258,7 @@ void RenderPipeline::drawFrame()
         throw std::runtime_error("failed to acquire swap chain image!");
     }
     
-    updateUniformBuffer(currentFrame);
+    
     
     // Only reset the fence if we are submitting work
     vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -383,20 +383,18 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     VkBuffer vertexBuffers[] = { vertexBuffer.vertexBuffer };
     VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-    vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
+    
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
     
-    /*
-     for (auto& sector : drawSectors)
-        vkCmdDrawIndexed(commandBuffer, sector.indexCount, 1, sector.startIndex, 0, 0);
-    */
-    
-//    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(vertexBuffer.indices.size()), 1, 0, 0, 0);
-    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(vertexBuffer.indices.size()), 1, 0, 0, 0);
-    
+    for (Actor& a : world->getWorldActors())
+    {
+        updateUniformBuffer(currentFrame, a.getModelMatrix());
+        
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(vertexBuffer.indices.size()), 1, 0, 0, 0);
+    }
     
     vkCmdEndRenderPass(commandBuffer);
 

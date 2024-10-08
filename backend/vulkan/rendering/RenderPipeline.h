@@ -94,7 +94,7 @@ private:
     void createCommandBuffers();
     
     void createUniformBuffers();
-    void updateUniformBuffer(uint32_t currentImage);
+    void updateUniformBuffer(uint32_t currentImage, glm::mat4 model);
     
     void createColorResources();
     void createDepthResources();
