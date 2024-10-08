@@ -26,8 +26,8 @@ glm::mat4 Actor::getModelMatrix()
     model = glm::translate(model, getWorldLocation());
     
     model = glm::rotate(model, glm::radians(getWorldRotation().x), glm::vec3(1, 0, 0));
-    model = glm::rotate(model, glm::radians(getWorldRotation().y), glm::vec3(0, 1, 0));
     model = glm::rotate(model, glm::radians(getWorldRotation().z), glm::vec3(0, 0, 1));
+    model = glm::rotate(model, glm::radians(getWorldRotation().y), glm::vec3(0, 1, 0));
     
     model = glm::scale(model, getWorldScale());
     

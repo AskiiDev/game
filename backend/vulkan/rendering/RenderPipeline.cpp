@@ -176,7 +176,7 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 {
     UniformBufferObject ubo{};
 
-    ubo.view = glm::lookAt(player->camera.worldLocation, player->camera.worldLocation + player->camera.forwardVector, player->camera.upVector);
+    ubo.view = glm::lookAt(player->getCamera().worldLocation, player->getCamera().worldLocation + player->getCamera().forwardVector, player->getCamera().upVector);
         
     ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 10.0f);
     

@@ -122,8 +122,9 @@ void Window::updateCursorDelta()
     prevX = currX;
     prevY = currY;
     
-    player->camera.yaw += deltaX;
-    player->camera.pitch = std::clamp(player->camera.pitch - deltaY, -87., 80.);
+    player->addCameraYaw(deltaX);
+    player->addCameraPitch(deltaY);
+    
     player->updateCameraVectors();
     
     updatingCursor = false;

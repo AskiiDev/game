@@ -17,7 +17,7 @@ void Player::init()
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
-    camera.yaw = -220.f;
+    camera.yaw = 0.f;
     camera.pitch = 0.f;
 
     updateCameraVectors();
@@ -87,3 +87,14 @@ void Player::updatePlayerMovement(float deltaTime)
     camera.worldLocation += playerVelocity * deltaTime;
 }
 
+
+void Player::addCameraYaw(float yaw)
+{
+    camera.yaw += yaw;
+}
+
+
+void Player::addCameraPitch(float pitch)
+{
+    camera.pitch = std::clamp(camera.pitch - pitch, cameraPitchMin, cameraPitchMax);
+}

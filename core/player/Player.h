@@ -24,12 +24,16 @@ struct Camera
     
     double yaw;
     double pitch;
+    
+    glm::vec3 getRotation()
+    {
+        return glm::vec3(0, pitch, yaw);
+    }
 };
 
 
 class Player {
 public:
-    Camera camera;
     uint8_t mvDirection = 0;
     
 private:
@@ -38,9 +42,20 @@ private:
     float deceleration = 15.0f;
     float playerSpeed = 1.2f;
     
+    double cameraPitchMin = -87.;
+    double cameraPitchMax = 80.;
+    
+    Camera camera;
+    
 public:
     Player();
     void init();
+    
+    Camera getCamera() { return camera; }
+    
+    void addCameraYaw(float yaw);
+    void addCameraPitch(float pitch);
+    
     void updateCameraVectors();
     void updatePlayerMovement(float deltaTime);
     
