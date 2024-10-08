@@ -13,19 +13,19 @@
 
 struct UniformBufferObject
 {
-    glm::mat4 model;
     glm::mat4 view;
     glm::mat4 proj;
 };
 
 struct PushConstants
 {
-    glm::vec2 resolution;
+    glm::mat4 modelMatrix;
 };
 
 
 class RenderPipeline {
 private:
+    float x = 0;
     const int MAX_FRAMES_IN_FLIGHT = 2;
     uint32_t currentFrame = 0;
     
@@ -68,7 +68,7 @@ private:
     
 public:
     RenderPipeline();
-    void init(DeviceManager* d, SwapChain* s, Player* p, World* w);
+    void init(DeviceManager* d, SwapChain* s, World* w);
     void drawFrame();
     void destroy();
     void destroyDepthBuffer();
@@ -94,7 +94,7 @@ private:
     void createCommandBuffers();
     
     void createUniformBuffers();
-    void updateUniformBuffer(uint32_t currentImage, glm::mat4 model);
+    void updateUniformBuffer(uint32_t currentImage);
     
     void createColorResources();
     void createDepthResources();

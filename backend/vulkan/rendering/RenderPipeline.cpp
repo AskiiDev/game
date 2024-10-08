@@ -13,12 +13,12 @@ RenderPipeline::RenderPipeline()
 }
 
 
-void RenderPipeline::init(DeviceManager* d, SwapChain* s, Player* p, World* w)
+void RenderPipeline::init(DeviceManager* d, SwapChain* s, World* w)
 {
     deviceManager = d;
     swapChain = s;
     device = d->device;
-    player = p;
+    player = w->getPlayer();
     world = w;
     
     msaaSamples = VK_SAMPLE_COUNT_2_BIT;
@@ -33,7 +33,7 @@ void RenderPipeline::init(DeviceManager* d, SwapChain* s, Player* p, World* w)
     createFramebuffers();
     
     textureBuffer.init(deviceManager, commandPool);
-    vertexBuffer.init(deviceManager, commandPool);
+    vertexBuffer.init(deviceManager, commandPool, w);
     
     createUniformBuffers();
     
@@ -77,7 +77,7 @@ void RenderPipeline::createDescriptorSets()
         for (size_t j = 0; j < textureBuffer.loadedTextures; ++j) {
             imageInfos[j].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             imageInfos[j].imageView = textureBuffer.textureImageView[j];
-            imageInfos[j].sampler = VK_NULL_HANDLE; // We're using a separate sampler
+            imageInfos[j].sampler = VK_NULL_HANDLE;
         }
 
         std::array<VkWriteDescriptorSet, 3> descriptorWrites{};
@@ -172,12 +172,10 @@ void RenderPipeline::createDescriptorSetLayout()
 }
 
 
-void RenderPipeline::updateUniformBuffer(uint32_t currentImage, glm::mat4 model)
+void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 {
     UniformBufferObject ubo{};
 
-    ubo.model = model;
-    
     ubo.view = glm::lookAt(player->camera.worldLocation, player->camera.worldLocation + player->camera.forwardVector, player->camera.upVector);
         
     ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 10.0f);
@@ -259,10 +257,10 @@ void RenderPipeline::drawFrame()
     }
     
     
-    
     // Only reset the fence if we are submitting work
     vkResetFences(device, 1, &inFlightFences[currentFrame]);
     
+    updateUniformBuffer(currentFrame);
     
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
@@ -355,17 +353,8 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
     
-    PushConstants push;
-    push.resolution = glm::vec2(swapChain->window->desiredResolution.width, swapChain->window->desiredResolution.height);
-    
-    vkCmdPushConstants(
-        commandBuffer,
-        pipelineLayout,
-        VK_SHADER_STAGE_FRAGMENT_BIT,
-        0,
-        sizeof(push),
-        &push
-    );
+
+//    push.resolution = glm::vec2(swapChain->window->desiredResolution.width, swapChain->window->desiredResolution.height);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -380,20 +369,35 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     scissor.offset = {0, 0};
     scissor.extent = swapChain->swapChainExtent;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-    VkBuffer vertexBuffers[] = { vertexBuffer.vertexBuffer };
-    VkDeviceSize offsets[] = {0};
+    
+    
+    
     
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
     
-    for (Actor& a : world->getWorldActors())
+    PushConstants push;
+    
+    for (size_t i = 0; i < world->getWorldActors().size(); i++)
     {
-        updateUniformBuffer(currentFrame, a.getModelMatrix());
+        Actor a = world->getWorldActors()[i];
+        push.modelMatrix = a.getModelMatrix();
         
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdPushConstants(
+            commandBuffer,
+            pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            0,
+            sizeof(push),
+            &push
+        );
         
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(vertexBuffer.indices.size()), 1, 0, 0, 0);
+        VkDeviceSize vertexOffsetInBytes = vertexBuffer.vertexOffsets[i] * sizeof(Vertex);
+        VkDeviceSize indexOffsetInBytes = vertexBuffer.indexOffsets[i] * sizeof(uint32_t);
+
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer.vertexBuffer, &vertexOffsetInBytes);
+        vkCmdBindIndexBuffer(commandBuffer, vertexBuffer.indexBuffer, indexOffsetInBytes, VK_INDEX_TYPE_UINT32);
+
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(a.getObject().indices.size()), 1, 0, 0, 0);
     }
     
     vkCmdEndRenderPass(commandBuffer);
@@ -609,7 +613,7 @@ void RenderPipeline::createRenderPipeline()
     dynamicState.pDynamicStates = dynamicStates.data();
     
     VkPushConstantRange pushConstantRange = {};
-    pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushConstantRange.offset = 0;
     pushConstantRange.size = sizeof(PushConstants);
 

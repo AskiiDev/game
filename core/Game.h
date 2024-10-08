@@ -11,7 +11,6 @@
 class Game {
 public:
     World world;
-    Player player;
     VulkanManager vkManager;
     Window gameWindow;
     AudioManager audioManager;

@@ -10,7 +10,6 @@ Game::Game()
 void Game::run()
 {
     world.load();
-    player.init();
     
     initWindow();
     initVulkan();
@@ -25,13 +24,13 @@ void Game::run()
 
 void Game::initWindow()
 {
-    gameWindow.init(this, &player);
+    gameWindow.init(this, &world);
 }
 
 
 void Game::initVulkan()
 {
-    vkManager.init(&gameWindow, &player, &world);
+    vkManager.init(&gameWindow, &world);
 }
 
 

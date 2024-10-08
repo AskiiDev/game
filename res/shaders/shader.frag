@@ -1,10 +1,6 @@
 #version 450
 #define MAX_TEXTURES 16
 
-layout(push_constant) uniform PushConstants {
-    vec2 resolution;
-} pc;
-
 layout(set = 0, binding = 1) uniform sampler texSampler;
 layout(set = 0, binding = 2) uniform texture2D textures[MAX_TEXTURES];
 
@@ -32,13 +28,13 @@ float bayerDither4x4(vec3 color, int x, int y)
 
 void main()
 {
-    float pixelationFactor = 512.0;
+//    float pixelationFactor = 512.0;
 
     // Get the texture coordinates and adjust them to achieve the pixelation effect
-    vec2 pixelatedCoords = floor(fragTexCoord * pixelationFactor) / pixelationFactor;
+//    vec2 pixelatedCoords = floor(fragTexCoord * pixelationFactor) / pixelationFactor;
 
     // Sample the texture using the pixelated coordinates
-    vec4 col = texture(sampler2D(textures[texIndex], texSampler), pixelatedCoords);
+    vec4 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord);
 //    outColor = vec4(col, 1.0);
     
     float dither;
@@ -48,7 +44,7 @@ void main()
     
     vec4 bayer = vec4(vec3(bayerDither4x4(col.rgb, x, y)), 1.0);
     
-    outColor = bayer/* * pow(col, vec4(0.9))*/;
-//    outColor *= 2;
+    outColor = bayer * pow(col, vec4(0.4));
+    outColor *= 2;
 //    outColor = bayer;
 }

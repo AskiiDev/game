@@ -76,6 +76,7 @@ struct Object
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
+    uint8_t textureID;
 };
 
 
@@ -118,7 +119,7 @@ const std::vector<const char*> deviceExtensions =
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-Object loadObject(const char* filename);
+Object loadObject(const char* filename, uint8_t textureID);
 
 bool checkValidationLayerSupport();
 

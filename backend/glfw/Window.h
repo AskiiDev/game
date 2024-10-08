@@ -4,6 +4,7 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include "Player.h"
+#include "World.h"
 #include <chrono>
 
 
@@ -15,7 +16,7 @@ struct Resolution
 };
 
 
-const int TARGET_FPS = 30;
+const int TARGET_FPS = 60;
 const std::chrono::duration<double> FRAME_DURATION(1.0 / TARGET_FPS);
 extern std::chrono::high_resolution_clock::time_point previousTime;
 
@@ -27,7 +28,8 @@ private:
     double deltaX = 0.0, deltaY = 0.0;
     double prevX = 0.0, prevY = 0.0;
     double lastDeltaX = 0, lastDeltaY = 0;
-    
+
+    World* world;
     Player* player;
     
 public:
@@ -46,7 +48,7 @@ public:
 public:
     Window();
     
-    void init(void* pointer, Player* p);
+    void init(void* pointer, World* w);
     void update();
     void destroy();
     

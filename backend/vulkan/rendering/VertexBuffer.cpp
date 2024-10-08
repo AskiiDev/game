@@ -6,10 +6,11 @@ VertexBuffer::VertexBuffer()
 }
 
 
-void VertexBuffer::init(DeviceManager* d, VkCommandPool cp)
+void VertexBuffer::init(DeviceManager* d, VkCommandPool cp, World* w)
 {
     deviceManager = d;
     commandPool = cp;
+    world = w;
     
     populateBuffers();
     
@@ -20,13 +21,22 @@ void VertexBuffer::init(DeviceManager* d, VkCommandPool cp)
 
 void VertexBuffer::populateBuffers()
 {
-    Object obj = loadObject("res/models/viking_room.obj");
-    
-    for (const Vertex& v : obj.vertices)
-        vertices.push_back(v);
-    
-    for (const uint32_t i : obj.indices)
-        indices.push_back(i);
+    uint32_t vertexOffset = 0;
+    uint32_t indexOffset = 0;
+
+    for (Actor& a : world->getWorldActors()) {
+        Object obj = a.getObject();
+
+        vertexOffsets.push_back(vertexOffset);
+        indexOffsets.push_back(indexOffset);
+
+        vertices.insert(vertices.end(), obj.vertices.begin(), obj.vertices.end());
+        indices.insert(indices.end(), obj.indices.begin(), obj.indices.end());
+
+        // Update offsets for the next object
+        vertexOffset += static_cast<uint32_t>(obj.vertices.size());
+        indexOffset += static_cast<uint32_t>(obj.indices.size());
+    }
 }
 
 

@@ -13,9 +13,11 @@ Window::Window()
 }
 
 
-void Window::init(void* pointer, Player* p)
+void Window::init(void* pointer, World* w)
 {
-    player = p;
+    world = w;
+    player = w->getPlayer();
+    
     glfwInit();
     
     monitor = glfwGetPrimaryMonitor();
@@ -53,19 +55,20 @@ void Window::update()
         player->mvDirection = 0;
     }
     
-    updateCursorDelta();
-//    printf("%f, %f\n", (float) deltaX, (float) deltaY);
-    player->updatePlayerMovement(std::chrono::duration<float>(deltaTime).count());
+    if (deltaTime < FRAME_DURATION)
+    {
+        auto sleepTime = FRAME_DURATION - deltaTime;
+        std::this_thread::sleep_for(sleepTime);
+    }
     
     auto currentTime = std::chrono::high_resolution_clock::now();
     deltaTime = currentTime - previousTime;
-//    std::cout << std::chrono::duration<float>(deltaTime).count() << std::endl;
     
-//    if (deltaTime < FRAME_DURATION)
-//    {
-//        auto sleepTime = FRAME_DURATION - deltaTime;
-//        std::this_thread::sleep_for(sleepTime);
-//    }
+    float dt = std::chrono::duration<float>(deltaTime).count();
+    
+    updateCursorDelta();
+    
+    world->update(dt);
 
     previousTime = std::chrono::high_resolution_clock::now();
 }

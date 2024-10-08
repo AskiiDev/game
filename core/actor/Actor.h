@@ -9,9 +9,15 @@ protected:
     Object obj;
     Transform worldTransform;
     
-public:
-    Actor(Object o, Transform t);
+    float deltaTime;
     
+public:
+    
+    Actor(Object o, Transform t);
+    void update(float deltaTime);
+    
+
+    // Getters
     glm::vec3 getWorldLocation();
     glm::vec3 getWorldRotation();
     glm::vec3 getWorldScale();
@@ -21,6 +27,18 @@ public:
     glm::vec3 getForwardVector();
     glm::vec3 getRightVector();
     glm::vec3 getUpVector();
+    
+    Object getObject();
+    
+    
+    // Setters
+    void setActorLocation(glm::vec3 location);
+    void setActorRotation(glm::vec3 rotation);
+    void setActorScale(glm::vec3 scale);
+    
+    void addActorLocation(glm::vec3 addLocation);
+    void addActorRotation(glm::vec3 addRotation);
+    void addActorScale(glm::vec3 addScale);
 
 private:
     

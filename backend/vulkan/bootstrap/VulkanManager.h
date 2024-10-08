@@ -24,7 +24,7 @@ private:
     
 public:
     VulkanManager();
-    void init(Window* window, Player* p, World* w);
+    void init(Window* window, World* w);
     void destroy();
     void draw();
     void idle();

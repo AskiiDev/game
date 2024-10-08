@@ -10,7 +10,7 @@
 #include <tiny_obj_loader.h>
 
 
-Object loadObject(const char* filename)
+Object loadObject(const char* filename, uint8_t textureID)
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
@@ -46,7 +46,7 @@ Object loadObject(const char* filename)
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
             vertex.color = {1.0f, 1.0f, 1.0f};
-            vertex.texIndex = 0;
+            vertex.texIndex = textureID;
 
             if (uniqueVertices.count(vertex) == 0)
             {
@@ -60,6 +60,7 @@ Object loadObject(const char* filename)
     
     obj.vertices = vertices;
     obj.indices = indices;
+    obj.textureID = textureID;
     return obj;
 };
 
