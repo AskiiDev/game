@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include <glm/glm.hpp>
+#include <array>
 
 
 enum Direction
@@ -25,8 +26,15 @@ struct Camera
     glm::mat4 viewMatrix;
     glm::mat4 projMatrix;
     
+    std::array<std::array<float, 4>, 6> planes;
+    
     double yaw;
     double pitch;
+    
+    glm::mat4 getViewProjMatrix()
+    {
+        return projMatrix * viewMatrix;
+    }
 };
 
 

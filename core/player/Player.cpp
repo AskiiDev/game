@@ -37,6 +37,15 @@ void Player::updateCameraVectors()
     camera.upVector = glm::normalize(glm::cross(camera.rightVector, camera.forwardVector));
     
     camera.viewMatrix = glm::lookAt(camera.worldLocation, camera.worldLocation + camera.forwardVector, camera.upVector);
+
+    camera.planes = {
+        std::array<float, 4>{ camera.getViewProjMatrix()[0][3] + camera.getViewProjMatrix()[0][0], camera.getViewProjMatrix()[1][3] + camera.getViewProjMatrix()[1][0], camera.getViewProjMatrix()[2][3] + camera.getViewProjMatrix()[2][0], camera.getViewProjMatrix()[3][3] + camera.getViewProjMatrix()[3][0] }, // Left
+        std::array<float, 4>{ camera.getViewProjMatrix()[0][3] - camera.getViewProjMatrix()[0][0], camera.getViewProjMatrix()[1][3] - camera.getViewProjMatrix()[1][0], camera.getViewProjMatrix()[2][3] - camera.getViewProjMatrix()[2][0], camera.getViewProjMatrix()[3][3] - camera.getViewProjMatrix()[3][0] }, // Right
+        std::array<float, 4>{ camera.getViewProjMatrix()[0][3] + camera.getViewProjMatrix()[0][1], camera.getViewProjMatrix()[1][3] + camera.getViewProjMatrix()[1][1], camera.getViewProjMatrix()[2][3] + camera.getViewProjMatrix()[2][1], camera.getViewProjMatrix()[3][3] + camera.getViewProjMatrix()[3][1] }, // Top
+        std::array<float, 4>{ camera.getViewProjMatrix()[0][3] - camera.getViewProjMatrix()[0][1], camera.getViewProjMatrix()[1][3] - camera.getViewProjMatrix()[1][1], camera.getViewProjMatrix()[2][3] - camera.getViewProjMatrix()[2][1], camera.getViewProjMatrix()[3][3] - camera.getViewProjMatrix()[3][1] }, // Bottom
+        std::array<float, 4>{ camera.getViewProjMatrix()[0][3] + camera.getViewProjMatrix()[0][2], camera.getViewProjMatrix()[1][3] + camera.getViewProjMatrix()[1][2], camera.getViewProjMatrix()[2][3] + camera.getViewProjMatrix()[2][2], camera.getViewProjMatrix()[3][3] + camera.getViewProjMatrix()[3][2] }, // Near
+        std::array<float, 4>{ camera.getViewProjMatrix()[0][3] - camera.getViewProjMatrix()[0][2], camera.getViewProjMatrix()[1][3] - camera.getViewProjMatrix()[1][2], camera.getViewProjMatrix()[2][3] - camera.getViewProjMatrix()[2][2], camera.getViewProjMatrix()[3][3] - camera.getViewProjMatrix()[3][2] }  // Far
+    };
 }
 
 

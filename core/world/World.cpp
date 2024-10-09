@@ -38,18 +38,13 @@ void World::update(float deltaTime)
     
     cullActors();
     
+    int i = 0;
     for (Actor& actor : worldActors)
     {
-        actor.update(deltaTime);
-    }
-    
-    int i = 0;
-    for (Actor& a : worldActors)
-    {
-        if (!a.getCulled())
-        {
+        if (!actor.getCulled())
             i++;
-        }
+            
+        actor.update(deltaTime);
     }
     
     printf("Actors drawn: %d\n", i);
@@ -58,17 +53,7 @@ void World::update(float deltaTime)
 
 void World::cullActors()
 {
-    std::vector<Actor> visibleActors;
-    glm::mat4 viewProjMatrix = player.getCamera().projMatrix * player.getCamera().viewMatrix;
-
-    float planes[6][4] = {
-        { viewProjMatrix[0][3] + viewProjMatrix[0][0], viewProjMatrix[1][3] + viewProjMatrix[1][0], viewProjMatrix[2][3] + viewProjMatrix[2][0], viewProjMatrix[3][3] + viewProjMatrix[3][0] }, // Left
-        { viewProjMatrix[0][3] - viewProjMatrix[0][0], viewProjMatrix[1][3] - viewProjMatrix[1][0], viewProjMatrix[2][3] - viewProjMatrix[2][0], viewProjMatrix[3][3] - viewProjMatrix[3][0] }, // Right
-        { viewProjMatrix[0][3] + viewProjMatrix[0][1], viewProjMatrix[1][3] + viewProjMatrix[1][1], viewProjMatrix[2][3] + viewProjMatrix[2][1], viewProjMatrix[3][3] + viewProjMatrix[3][1] }, // Top
-        { viewProjMatrix[0][3] - viewProjMatrix[0][1], viewProjMatrix[1][3] - viewProjMatrix[1][1], viewProjMatrix[2][3] - viewProjMatrix[2][1], viewProjMatrix[3][3] - viewProjMatrix[3][1] }, // Bottom
-        { viewProjMatrix[0][3] + viewProjMatrix[0][2], viewProjMatrix[1][3] + viewProjMatrix[1][2], viewProjMatrix[2][3] + viewProjMatrix[2][2], viewProjMatrix[3][3] + viewProjMatrix[3][2] }, // Near
-        { viewProjMatrix[0][3] - viewProjMatrix[0][2], viewProjMatrix[1][3] - viewProjMatrix[1][2], viewProjMatrix[2][3] - viewProjMatrix[2][2], viewProjMatrix[3][3] - viewProjMatrix[3][2] }, // Far
-    };
+    std::array<std::array<float, 4>, 6> planes = getPlayer()->getCamera().planes;
 
     for (Actor& actor : worldActors)
     {
