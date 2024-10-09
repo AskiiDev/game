@@ -176,9 +176,11 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 {
     UniformBufferObject ubo{};
 
-    ubo.view = glm::lookAt(player->getCamera().worldLocation, player->getCamera().worldLocation + player->getCamera().forwardVector, player->getCamera().upVector);
+    ubo.view = player->getCamera().viewMatrix;
         
     ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 10.0f);
+    
+    player->setProjectionMatrix(ubo.proj);
     
     ubo.proj[1][1] *= -1;
 
@@ -376,10 +378,22 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
     
     PushConstants push;
+    vkCmdPushConstants(
+            commandBuffer,
+            pipelineLayout,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            0,
+            sizeof(push),
+            &push
+        );
     
     for (size_t i = 0; i < world->getWorldActors().size(); i++)
     {
         Actor a = world->getWorldActors()[i];
+        
+        if (a.getCulled())
+            continue;
+        
         push.modelMatrix = a.getModelMatrix();
         
         vkCmdPushConstants(

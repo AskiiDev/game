@@ -17,7 +17,7 @@ void Player::init()
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
-    camera.yaw = 0.f;
+    camera.yaw = 180.f;
     camera.pitch = 0.f;
 
     updateCameraVectors();
@@ -35,6 +35,14 @@ void Player::updateCameraVectors()
     
     camera.rightVector = glm::normalize(glm::cross(camera.forwardVector, camera.worldUpVector));
     camera.upVector = glm::normalize(glm::cross(camera.rightVector, camera.forwardVector));
+    
+    camera.viewMatrix = glm::lookAt(camera.worldLocation, camera.worldLocation + camera.forwardVector, camera.upVector);
+}
+
+
+void Player::setProjectionMatrix(glm::mat4 proj)
+{
+    camera.projMatrix = proj;
 }
 
 
@@ -91,10 +99,12 @@ void Player::updatePlayerMovement(float deltaTime)
 void Player::addCameraYaw(float yaw)
 {
     camera.yaw += yaw;
+    updateCameraVectors();
 }
 
 
 void Player::addCameraPitch(float pitch)
 {
     camera.pitch = std::clamp(camera.pitch - pitch, cameraPitchMin, cameraPitchMax);
+    updateCameraVectors();
 }

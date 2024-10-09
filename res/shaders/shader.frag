@@ -34,7 +34,7 @@ void main()
 //    vec2 pixelatedCoords = floor(fragTexCoord * pixelationFactor) / pixelationFactor;
 
     // Sample the texture using the pixelated coordinates
-    vec4 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord);
+    vec3 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord).rgb;
 //    outColor = vec4(col, 1.0);
     
     float dither;
@@ -42,9 +42,9 @@ void main()
     int x = int(gl_FragCoord.x) % 4;
     int y = int(gl_FragCoord.y) % 4;
     
-    vec4 bayer = vec4(vec3(bayerDither4x4(col.rgb, x, y)), 1.0);
+    vec3 bayer = vec3(bayerDither4x4(col.rgb, x, y));
     
-    outColor = bayer * pow(col, vec4(0.4));
+    outColor = vec4(bayer * pow(col, vec3(0.4)), 1.0);
     outColor *= 2;
 //    outColor = bayer;
 }

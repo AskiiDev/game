@@ -15,12 +15,14 @@ public:
     
     void load();
     void update(float deltaTime);
+    
     std::vector<Actor> getWorldActors() { return worldActors; }
     
     Player* getPlayer();
     
 private:
     void pushActor(Actor newActor);
+    void cullActors();
     
 };
 

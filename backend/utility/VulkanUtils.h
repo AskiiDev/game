@@ -72,11 +72,18 @@ namespace std
 }
 
 
+struct BoundingBox {
+    glm::vec3 min;
+    glm::vec3 max;
+};
+
+
 struct Object
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
     uint8_t textureID;
+    BoundingBox boundingBox;
 };
 
 
@@ -119,7 +126,8 @@ const std::vector<const char*> deviceExtensions =
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-Object loadObject(const char* filename, uint8_t textureID);
+Object loadObject(const char* filename, uint8_t textureID, float radius);
+BoundingBox generateBoundingBox(const std::vector<Vertex>& vertices);
 
 bool checkValidationLayerSupport();
 

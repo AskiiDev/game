@@ -11,6 +11,8 @@ protected:
     
     float deltaTime;
     
+    bool isCulled = true;
+    
 public:
     
     Actor(Object o, Transform t);
@@ -30,6 +32,9 @@ public:
     
     Object getObject();
     
+    BoundingBox getBoundingBox();
+    bool getCulled() { return isCulled; }
+    
     
     // Setters
     void setActorLocation(glm::vec3 location);
@@ -39,6 +44,8 @@ public:
     void addActorLocation(glm::vec3 addLocation);
     void addActorRotation(glm::vec3 addRotation);
     void addActorScale(glm::vec3 addScale);
+    
+    void setCulled(bool occlude);
 
 private:
     

@@ -22,13 +22,11 @@ struct Camera
     glm::vec3 rightVector;
     glm::vec3 worldUpVector;
     
+    glm::mat4 viewMatrix;
+    glm::mat4 projMatrix;
+    
     double yaw;
     double pitch;
-    
-    glm::vec3 getRotation()
-    {
-        return glm::vec3(0, pitch, yaw);
-    }
 };
 
 
@@ -52,6 +50,8 @@ public:
     void init();
     
     Camera getCamera() { return camera; }
+    
+    void setProjectionMatrix(glm::mat4 proj);
     
     void addCameraYaw(float yaw);
     void addCameraPitch(float pitch);

@@ -55,11 +55,11 @@ void Window::update()
         player->mvDirection = 0;
     }
     
-    if (deltaTime < FRAME_DURATION)
-    {
-        auto sleepTime = FRAME_DURATION - deltaTime;
-        std::this_thread::sleep_for(sleepTime);
-    }
+//    if (deltaTime < FRAME_DURATION)
+//    {
+//        auto sleepTime = FRAME_DURATION - deltaTime;
+//        std::this_thread::sleep_for(sleepTime);
+//    }
     
     auto currentTime = std::chrono::high_resolution_clock::now();
     deltaTime = currentTime - previousTime;
@@ -124,8 +124,6 @@ void Window::updateCursorDelta()
     
     player->addCameraYaw(deltaX);
     player->addCameraPitch(deltaY);
-    
-    player->updateCameraVectors();
     
     updatingCursor = false;
 }

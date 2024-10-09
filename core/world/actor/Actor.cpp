@@ -102,3 +102,51 @@ void Actor::addActorScale(glm::vec3 addScale)
 {
     worldTransform.worldScale += addScale * deltaTime;
 }
+
+
+void Actor::setCulled(bool occlude)
+{
+    isCulled = occlude;
+}
+
+
+BoundingBox Actor::getBoundingBox()
+{
+    BoundingBox box = obj.boundingBox;
+
+    // Get the 8 corners of the original bounding box in object space
+    glm::vec3 min = box.min;
+    glm::vec3 max = box.max;
+
+    std::vector<glm::vec3> corners = {
+        glm::vec3(min.x, min.y, min.z),
+        glm::vec3(max.x, min.y, min.z),
+        glm::vec3(min.x, max.y, min.z),
+        glm::vec3(max.x, max.y, min.z),
+        glm::vec3(min.x, min.y, max.z),
+        glm::vec3(max.x, min.y, max.z),
+        glm::vec3(min.x, max.y, max.z),
+        glm::vec3(max.x, max.y, max.z)
+    };
+
+    // Initialize transformed bounding box
+    glm::vec3 transformedMin(FLT_MAX);
+    glm::vec3 transformedMax(-FLT_MAX);
+
+    // Apply the actor's world transformation to all corners
+    for (const auto& corner : corners)
+    {
+        glm::vec3 transformedCorner = glm::vec3(getModelMatrix() * glm::vec4(corner, 1.0f));
+
+        // Update the transformed bounding box
+        transformedMin = glm::min(transformedMin, transformedCorner);
+        transformedMax = glm::max(transformedMax, transformedCorner);
+    }
+
+    // Set the transformed bounding box
+    BoundingBox transformedBox;
+    transformedBox.min = transformedMin;
+    transformedBox.max = transformedMax;
+
+    return transformedBox;
+}

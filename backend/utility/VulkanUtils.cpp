@@ -10,7 +10,7 @@
 #include <tiny_obj_loader.h>
 
 
-Object loadObject(const char* filename, uint8_t textureID)
+Object loadObject(const char* filename, uint8_t textureID, float radius)
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
@@ -61,8 +61,36 @@ Object loadObject(const char* filename, uint8_t textureID)
     obj.vertices = vertices;
     obj.indices = indices;
     obj.textureID = textureID;
+    obj.boundingBox = generateBoundingBox(vertices);
     return obj;
 };
+
+
+BoundingBox generateBoundingBox(const std::vector<Vertex>& vertices)
+{
+    BoundingBox box;
+    
+    if (vertices.empty()) {
+        throw std::runtime_error("No vertices available to compute the bounding box.");
+    }
+
+    box.min = vertices[0].pos;
+    box.max = vertices[0].pos;
+
+    for (const auto& vertex : vertices) {
+        const glm::vec3& pos = vertex.pos;
+
+        box.min.x = std::min(box.min.x, pos.x);
+        box.min.y = std::min(box.min.y, pos.y);
+        box.min.z = std::min(box.min.z, pos.z);
+
+        box.max.x = std::max(box.max.x, pos.x);
+        box.max.y = std::max(box.max.y, pos.y);
+        box.max.z = std::max(box.max.z, pos.z);
+    }
+
+    return box;
+}
 
 
 bool checkValidationLayerSupport()
