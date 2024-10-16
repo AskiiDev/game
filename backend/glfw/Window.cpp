@@ -16,7 +16,7 @@ Window::Window()
 void Window::init(void* pointer, World* w)
 {
     world = w;
-    player = w->getPlayer();
+    player = w->getPlayerAsRef();
     
     glfwInit();
     

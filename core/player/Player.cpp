@@ -55,7 +55,7 @@ void Player::setProjectionMatrix(glm::mat4 proj)
 }
 
 
-glm::vec3 Player::getPlayerDesiredLocation(float deltaTime)
+glm::vec3 Player::getPlayerVelocity(float deltaTime)
 {
     glm::vec3 mask = glm::vec3(1, 1, 1);
     
@@ -101,13 +101,19 @@ glm::vec3 Player::getPlayerDesiredLocation(float deltaTime)
         playerVelocity = glm::mix(playerVelocity, glm::vec3(0.0f), deceleration * deltaTime);
     }
 
-    return camera.worldLocation + playerVelocity * deltaTime;
+    return playerVelocity * deltaTime;
 }
 
 
-void Player::movePlayer(glm::vec3 newLocation)
+void Player::movePlayerDelta(glm::vec3 newLocation)
 {
-    camera.worldLocation = newLocation;
+    camera.worldLocation += newLocation;
+}
+
+
+glm::vec3 Player::getPlayerLocation()
+{
+    return camera.worldLocation;
 }
 
 

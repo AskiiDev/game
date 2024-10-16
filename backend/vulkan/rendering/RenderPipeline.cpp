@@ -18,7 +18,7 @@ void RenderPipeline::init(DeviceManager* d, SwapChain* s, World* w)
     deviceManager = d;
     swapChain = s;
     device = d->device;
-    player = w->getPlayer();
+    player = w->getPlayerAsRef();
     world = w;
     
     msaaSamples = VK_SAMPLE_COUNT_2_BIT;

@@ -35,37 +35,7 @@ void World::load()
 
 void World::update(float deltaTime)
 {
-    glm::vec3 playerTryMoveLocation = getPlayer()->getPlayerDesiredLocation(deltaTime);
-    
-    glm::vec3 collisionNormal;
-    if (!doesPlayerCollideWithActors(playerTryMoveLocation, worldActors, collisionNormal))
-    {
-        getPlayer()->movePlayer(playerTryMoveLocation);
-    }
-    else
-    {
-        glm::vec3 desiredMovement = playerTryMoveLocation - getPlayer()->getCamera().worldLocation;
-        glm::vec3 slideDirection = desiredMovement - glm::dot(desiredMovement, collisionNormal) * collisionNormal;
-        glm::vec3 slideLocation = getPlayer()->getCamera().worldLocation + slideDirection;
-  
-        
-        if (!doesPlayerCollideWithActors(slideLocation, worldActors, collisionNormal))
-        {
-            getPlayer()->movePlayer(slideLocation);
-        }
-        else
-        {
-            // If the player still collides, slightly adjust the movement to nudge them away from the edge
-            glm::vec3 smallNudge = 0.02f * collisionNormal;  // Small adjustment along collision normal
-            glm::vec3 nudgeMoveLocation = slideLocation + smallNudge;
-
-            if (!doesPlayerCollideWithActors(nudgeMoveLocation, worldActors, collisionNormal))
-            {
-                getPlayer()->movePlayer(nudgeMoveLocation);
-            }
-        }
-    }
-    
+    movePlayerWithCollision(getPlayerAsRef(), worldActors, deltaTime);
     frustumCullActors(player, worldActors);
     
 //    int i = 0;
@@ -101,7 +71,7 @@ void World::update(float deltaTime)
 }
 
 
-Player* World::getPlayer()
+Player* World::getPlayerAsRef()
 {
     return &player;
 }

@@ -19,7 +19,7 @@ public:
     
     std::vector<Actor> getWorldActors() { return worldActors; }
     
-    Player* getPlayer();
+    Player* getPlayerAsRef();
     
 private:
     void pushActor(Actor newActor);

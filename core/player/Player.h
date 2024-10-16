@@ -66,8 +66,10 @@ public:
     
     void updateCameraVectors();
     
-    glm::vec3 getPlayerDesiredLocation(float deltaTime);
-    void movePlayer(glm::vec3 newLocation);
+    glm::vec3 getPlayerVelocity(float deltaTime);
+    glm::vec3 getPlayerLocation();
+    
+    void movePlayerDelta(glm::vec3 newLocation);
     
     bool checkIntersection(const float length);
     
