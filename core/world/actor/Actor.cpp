@@ -2,10 +2,16 @@
 #include <GLFW/glfw3.h>
 
 
-Actor::Actor(Object o, Transform t)
+Actor::Actor(const Object o, const Transform t)
 {
     obj = o;
     worldTransform = t;
+}
+
+
+Actor::Actor(const Object o, const Transform t, const CollisionProfile cp) : Actor(o, t)
+{
+    collisionProfile = cp;
 }
 
 
@@ -15,11 +21,11 @@ void Actor::update(float dt)
 }
 
 
-glm::vec3 Actor::getWorldLocation() { return worldTransform.worldLocation; }
-glm::vec3 Actor::getWorldRotation() { return worldTransform.worldRotation; }
-glm::vec3 Actor::getWorldScale() { return worldTransform.worldScale; }
+glm::vec3 Actor::getWorldLocation() const { return worldTransform.worldLocation; }
+glm::vec3 Actor::getWorldRotation() const { return worldTransform.worldRotation; }
+glm::vec3 Actor::getWorldScale() const { return worldTransform.worldScale; }
 
-glm::mat4 Actor::getModelMatrix()
+glm::mat4 Actor::getModelMatrix() const
 {
     glm::mat4 model = glm::mat4(1.f);
     
@@ -35,7 +41,7 @@ glm::mat4 Actor::getModelMatrix()
 }
 
 
-glm::vec3 Actor::getForwardVector()
+glm::vec3 Actor::getForwardVector() const
 {
     glm::vec3 direction;
     
@@ -46,7 +52,7 @@ glm::vec3 Actor::getForwardVector()
     return glm::normalize(direction);
 }
 
-glm::vec3 Actor::getRightVector()
+glm::vec3 Actor::getRightVector() const
 {
     glm::vec3 forward = getForwardVector();
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -54,7 +60,8 @@ glm::vec3 Actor::getRightVector()
     return glm::normalize(glm::cross(forward, up));
 }
 
-glm::vec3 Actor::getUpVector() {
+glm::vec3 Actor::getUpVector() const
+{
     glm::vec3 forward = getForwardVector();
     glm::vec3 right = getRightVector();
     
@@ -62,13 +69,13 @@ glm::vec3 Actor::getUpVector() {
 }
 
 
-Object Actor::getObject()
+Object Actor::getObject() const
 {
     return obj;
 }
 
 
-void Actor::setActorLocation(glm::vec3 location)
+void Actor::setActorLocation(const glm::vec3 location)
 {
     if (!hasUpdatedSinceLastDraw)
         hasUpdatedSinceLastDraw = true;
@@ -77,7 +84,7 @@ void Actor::setActorLocation(glm::vec3 location)
 }
 
 
-void Actor::setActorRotation(glm::vec3 rotation)
+void Actor::setActorRotation(const glm::vec3 rotation)
 {
     if (!hasUpdatedSinceLastDraw)
         hasUpdatedSinceLastDraw = true;
@@ -86,7 +93,7 @@ void Actor::setActorRotation(glm::vec3 rotation)
 }
 
 
-void Actor::setActorScale(glm::vec3 scale)
+void Actor::setActorScale(const glm::vec3 scale)
 {
     if (!hasUpdatedSinceLastDraw)
         hasUpdatedSinceLastDraw = true;
@@ -95,27 +102,37 @@ void Actor::setActorScale(glm::vec3 scale)
 }
 
 
-void Actor::addActorLocation(glm::vec3 addLocation)
+void Actor::addActorLocation(const glm::vec3 addLocation)
 {
     setActorLocation(worldTransform.worldLocation + addLocation * deltaTime);
 }
 
 
-void Actor::addActorRotation(glm::vec3 addRotation)
+void Actor::addActorRotation(const glm::vec3 addRotation)
 {
     setActorRotation(worldTransform.worldRotation + addRotation * deltaTime);
 }
 
 
-void Actor::addActorScale(glm::vec3 addScale)
+void Actor::addActorScale(const glm::vec3 addScale)
 {
     setActorScale(worldTransform.worldScale + addScale * deltaTime);
 }
 
 
-void Actor::setCulled(bool occlude)
+void Actor::setCulled(const bool occlude)
 {
     isCulled = occlude;
+}
+
+void Actor::setActive(const bool active)
+{
+    isActive = active;
+}
+
+void Actor::setCollisionProfile(const CollisionProfile cp)
+{
+    collisionProfile = cp;
 }
 
 
@@ -131,7 +148,7 @@ BoundingBox Actor::getBoundingBox()
 }
 
 
-BoundingBox Actor::calculateBoundingBox()
+BoundingBox Actor::calculateBoundingBox() const
 {
     BoundingBox box = obj.boundingBox;
 
@@ -191,3 +208,15 @@ std::vector<glm::vec3> Actor::getBoundingBoxCorners()
         glm::vec3(max.x, max.y, max.z)
     };
 }
+
+
+float Actor::getApproximateBoundingRadius()
+{
+    BoundingBox box = getBoundingBox();
+    
+    glm::vec3 min = box.min;
+    glm::vec3 max = box.max;
+    
+    return glm::max(max.x - min.x, glm::max(max.y - min.y, max.z - min.z)) / 2.0f;
+}
+

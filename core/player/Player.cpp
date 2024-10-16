@@ -120,12 +120,10 @@ glm::vec3 Player::getPlayerLocation()
 void Player::addCameraYaw(float yaw)
 {\
     camera.yaw += yaw;
-    updateCameraVectors();
 }
 
 
 void Player::addCameraPitch(float pitch)
 {
     camera.pitch = std::clamp(camera.pitch - pitch, cameraPitchMin, cameraPitchMax);
-    updateCameraVectors();
 }

@@ -2,6 +2,7 @@
 #define ACTOR_H
 
 #include "VulkanUtils.h"
+#include "Collision.h"
 
 
 class Actor {
@@ -13,6 +14,8 @@ protected:
     Object obj;
     Transform worldTransform;
     
+    CollisionProfile collisionProfile = CollisionProfile::CW_DEFAULT;
+    
     float deltaTime;
     
     bool isCulled = true;
@@ -22,41 +25,50 @@ protected:
     
 public:
     
-    Actor(Object o, Transform t);
+    Actor(const Object o, const Transform t);
+    Actor(const Object o, const Transform t, const CollisionProfile cp);
+    
     void update(float deltaTime);
     
 
     // Getters
-    glm::vec3 getWorldLocation();
-    glm::vec3 getWorldRotation();
-    glm::vec3 getWorldScale();
+    glm::vec3 getWorldLocation() const;
+    glm::vec3 getWorldRotation() const;
+    glm::vec3 getWorldScale() const;
     
-    glm::mat4 getModelMatrix();
+    glm::mat4 getModelMatrix() const;
     
-    glm::vec3 getForwardVector();
-    glm::vec3 getRightVector();
-    glm::vec3 getUpVector();
+    glm::vec3 getForwardVector() const;
+    glm::vec3 getRightVector() const;
+    glm::vec3 getUpVector() const;
     
-    Object getObject();
+    Object getObject() const;
     
     BoundingBox getBoundingBox();
-    BoundingBox calculateBoundingBox();
+    BoundingBox calculateBoundingBox() const;
     
     std::vector<glm::vec3> getBoundingBoxCorners();
+    float getApproximateBoundingRadius();
     
+    CollisionProfile getCollisionProfile() { return collisionProfile; }
     bool getCulled() { return isCulled; }
+    bool getActive() { return isActive; }
     
     
     // Setters
-    void setActorLocation(glm::vec3 location);
-    void setActorRotation(glm::vec3 rotation);
-    void setActorScale(glm::vec3 scale);
+    void setActorLocation(const glm::vec3 location);
+    void setActorRotation(const glm::vec3 rotation);
+    void setActorScale(const glm::vec3 scale);
     
-    void addActorLocation(glm::vec3 addLocation);
-    void addActorRotation(glm::vec3 addRotation);
-    void addActorScale(glm::vec3 addScale);
+    void addActorLocation(const glm::vec3 addLocation);
+    void addActorRotation(const glm::vec3 addRotation);
+    void addActorScale(const glm::vec3 addScale);
     
-    void setCulled(bool occlude);
+    void setCulled(const bool occlude);
+    void setActive(const bool active);
+    
+    void setCollisionProfile(const CollisionProfile cp);
+    
 
 private:
     
