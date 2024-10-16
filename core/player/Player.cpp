@@ -17,7 +17,7 @@ void Player::init()
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
-    camera.yaw = 180.f;
+    camera.yaw = 90.f;
     camera.pitch = 0.f;
 
     updateCameraVectors();
@@ -55,7 +55,7 @@ void Player::setProjectionMatrix(glm::mat4 proj)
 }
 
 
-void Player::updatePlayerMovement(float deltaTime)
+glm::vec3 Player::getPlayerDesiredLocation(float deltaTime)
 {
     glm::vec3 mask = glm::vec3(1, 1, 1);
     
@@ -101,12 +101,18 @@ void Player::updatePlayerMovement(float deltaTime)
         playerVelocity = glm::mix(playerVelocity, glm::vec3(0.0f), deceleration * deltaTime);
     }
 
-    camera.worldLocation += playerVelocity * deltaTime;
+    return camera.worldLocation + playerVelocity * deltaTime;
+}
+
+
+void Player::movePlayer(glm::vec3 newLocation)
+{
+    camera.worldLocation = newLocation;
 }
 
 
 void Player::addCameraYaw(float yaw)
-{
+{\
     camera.yaw += yaw;
     updateCameraVectors();
 }

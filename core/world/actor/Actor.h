@@ -5,6 +5,10 @@
 
 
 class Actor {
+private:
+    BoundingBox cachedBoundingBox;
+    bool hasUpdatedSinceLastDraw = true;
+    
 protected:
     Object obj;
     Transform worldTransform;
@@ -12,6 +16,9 @@ protected:
     float deltaTime;
     
     bool isCulled = true;
+    bool isActive = true;
+    
+    bool activityOverride = false;
     
 public:
     
@@ -33,6 +40,10 @@ public:
     Object getObject();
     
     BoundingBox getBoundingBox();
+    BoundingBox calculateBoundingBox();
+    
+    std::vector<glm::vec3> getBoundingBoxCorners();
+    
     bool getCulled() { return isCulled; }
     
     

@@ -65,7 +65,9 @@ public:
     void addCameraPitch(float pitch);
     
     void updateCameraVectors();
-    void updatePlayerMovement(float deltaTime);
+    
+    glm::vec3 getPlayerDesiredLocation(float deltaTime);
+    void movePlayer(glm::vec3 newLocation);
     
     bool checkIntersection(const float length);
     

@@ -8,6 +8,7 @@
 class World {
 private:
     Player player;
+    glm::mat4 lastViewMatrix;
     std::vector<Actor> worldActors;
     
 public:
@@ -22,7 +23,6 @@ public:
     
 private:
     void pushActor(Actor newActor);
-    void cullActors();
     
 };
 

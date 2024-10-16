@@ -25,9 +25,9 @@ glm::mat4 Actor::getModelMatrix()
     
     model = glm::translate(model, getWorldLocation());
     
-    model = glm::rotate(model, glm::radians(getWorldRotation().x), glm::vec3(1, 0, 0));
     model = glm::rotate(model, glm::radians(getWorldRotation().z), glm::vec3(0, 0, 1));
     model = glm::rotate(model, glm::radians(getWorldRotation().y), glm::vec3(0, 1, 0));
+    model = glm::rotate(model, glm::radians(getWorldRotation().x), glm::vec3(1, 0, 0));
     
     model = glm::scale(model, getWorldScale());
     
@@ -70,37 +70,46 @@ Object Actor::getObject()
 
 void Actor::setActorLocation(glm::vec3 location)
 {
+    if (!hasUpdatedSinceLastDraw)
+        hasUpdatedSinceLastDraw = true;
+    
     worldTransform.worldLocation = location;
 }
 
 
 void Actor::setActorRotation(glm::vec3 rotation)
 {
+    if (!hasUpdatedSinceLastDraw)
+        hasUpdatedSinceLastDraw = true;
+    
     worldTransform.worldRotation = rotation;
 }
 
 
 void Actor::setActorScale(glm::vec3 scale)
 {
+    if (!hasUpdatedSinceLastDraw)
+        hasUpdatedSinceLastDraw = true;
+    
     worldTransform.worldScale = scale;
 }
 
 
 void Actor::addActorLocation(glm::vec3 addLocation)
 {
-    worldTransform.worldLocation += addLocation * deltaTime;
+    setActorLocation(worldTransform.worldLocation + addLocation * deltaTime);
 }
 
 
 void Actor::addActorRotation(glm::vec3 addRotation)
 {
-    worldTransform.worldRotation += addRotation * deltaTime;
+    setActorRotation(worldTransform.worldRotation + addRotation * deltaTime);
 }
 
 
 void Actor::addActorScale(glm::vec3 addScale)
 {
-    worldTransform.worldScale += addScale * deltaTime;
+    setActorScale(worldTransform.worldScale + addScale * deltaTime);
 }
 
 
@@ -111,6 +120,18 @@ void Actor::setCulled(bool occlude)
 
 
 BoundingBox Actor::getBoundingBox()
+{
+    if (hasUpdatedSinceLastDraw)
+    {
+        cachedBoundingBox = calculateBoundingBox();
+        hasUpdatedSinceLastDraw = false;
+    }
+    
+    return cachedBoundingBox;
+}
+
+
+BoundingBox Actor::calculateBoundingBox()
 {
     BoundingBox box = obj.boundingBox;
 
@@ -147,6 +168,26 @@ BoundingBox Actor::getBoundingBox()
     BoundingBox transformedBox;
     transformedBox.min = transformedMin;
     transformedBox.max = transformedMax;
-
+    
     return transformedBox;
+}
+
+
+std::vector<glm::vec3> Actor::getBoundingBoxCorners()
+{
+    BoundingBox box = getBoundingBox();
+    
+    glm::vec3 min = box.min;
+    glm::vec3 max = box.max;
+
+    return {
+        glm::vec3(min.x, min.y, min.z),
+        glm::vec3(max.x, min.y, min.z),
+        glm::vec3(min.x, max.y, min.z),
+        glm::vec3(max.x, max.y, min.z),
+        glm::vec3(min.x, min.y, max.z),
+        glm::vec3(max.x, min.y, max.z),
+        glm::vec3(min.x, max.y, max.z),
+        glm::vec3(max.x, max.y, max.z)
+    };
 }
