@@ -1,3 +1,7 @@
+#ifndef COLLISIONPROFILE_H
+#define COLLISIONPROFILE_H
+
+
 /**
  * @enum CollisionProfile
  * @brief Enum representing different collision profiles for game entities.
@@ -27,5 +31,8 @@ enum CollisionProfile
     CW_NONE = 0,
     CW_PLAYER = (1 << 0),
     CW_ACTOR = (1 << 1),
-    CW_DEFAULT = (CW_PLAYER bitor CW_ACTOR)
+    CW_DEFAULT = (CW_PLAYER | CW_ACTOR)
 };
+
+
+#endif

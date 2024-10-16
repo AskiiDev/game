@@ -61,10 +61,9 @@ void Window::update()
 //        std::this_thread::sleep_for(sleepTime);
 //    }
     
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    deltaTime = currentTime - previousTime;
-    
+    deltaTime = std::chrono::high_resolution_clock::now() - previousTime;
     float dt = std::chrono::duration<float>(deltaTime).count();
+//    printf("FPS: %f\n", 1.f / dt);
     
     updateCursorDelta();
     

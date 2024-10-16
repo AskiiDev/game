@@ -2,7 +2,7 @@
 #define ACTOR_H
 
 #include "VulkanUtils.h"
-#include "Collision.h"
+#include "CollisionProfile.h"
 
 
 class Actor {

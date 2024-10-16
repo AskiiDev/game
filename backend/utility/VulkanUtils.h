@@ -126,7 +126,7 @@ const std::vector<const char*> deviceExtensions =
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-Object loadObject(const char* filename, uint8_t textureID, float radius);
+Object loadObject(const char* filename, uint8_t textureID);
 BoundingBox generateBoundingBox(const std::vector<Vertex>& vertices);
 
 bool checkValidationLayerSupport();

@@ -10,7 +10,7 @@
 #include <tiny_obj_loader.h>
 
 
-Object loadObject(const char* filename, uint8_t textureID, float radius)
+Object loadObject(const char* filename, uint8_t textureID)
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;

@@ -68,10 +68,7 @@ public:
     glm::vec3 getPlayerVelocity(float deltaTime);
     glm::vec3 getPlayerLocation();
     
-    void movePlayerDelta(glm::vec3 newLocation);
-    
-    bool checkIntersection(const float length);
-    
+    void movePlayerDelta(glm::vec3 deltaLocation);
 };
 
 #endif

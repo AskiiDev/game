@@ -105,9 +105,9 @@ glm::vec3 Player::getPlayerVelocity(float deltaTime)
 }
 
 
-void Player::movePlayerDelta(glm::vec3 newLocation)
+void Player::movePlayerDelta(glm::vec3 deltaLocation)
 {
-    camera.worldLocation += newLocation;
+    camera.worldLocation += deltaLocation;
 }
 
 

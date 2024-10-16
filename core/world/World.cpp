@@ -3,8 +3,6 @@
 #include "CollisionManager.h"
 #include <GLFW/glfw3.h>
 
-#define PI 3.14159f
-
 
 World::World()
 {
@@ -15,15 +13,17 @@ void World::load()
 {
     player.init();
     
-    Transform t = { glm::vec3(-0.f, -0.f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    Object o = loadObject("res/models/viking_room.obj", 0, 2.2f);
+    Transform t;
+    Object o;
+    
+    t = { glm::vec3(-0.f, -0.f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    o = loadObject("res/models/viking_room.obj", 0);
     Actor a(o, t);
     
-    
     t = { glm::vec3(1.2f, 1.5f, 1.1f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f) };
-    o = loadObject("res/models/sword/sword.obj", 1, 1.f);
+    o = loadObject("res/models/sword/sword.obj", 1);
+//    o = loadObject("res/models/chateau.obj", 0);
     Actor b(o, t);
-    
     
     t = { glm::vec3(1.8f, 1.1f, 1.1f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.2f) };
     Actor c(o, t);
