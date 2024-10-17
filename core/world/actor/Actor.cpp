@@ -75,7 +75,7 @@ Object Actor::getObject() const
 }
 
 
-void Actor::setActorLocation(const glm::vec3 location)
+void Actor::setActorLocation(const glm::vec3& location)
 {
     if (!hasUpdatedSinceLastDraw)
         hasUpdatedSinceLastDraw = true;
@@ -84,7 +84,7 @@ void Actor::setActorLocation(const glm::vec3 location)
 }
 
 
-void Actor::setActorRotation(const glm::vec3 rotation)
+void Actor::setActorRotation(const glm::vec3& rotation)
 {
     if (!hasUpdatedSinceLastDraw)
         hasUpdatedSinceLastDraw = true;
@@ -93,7 +93,7 @@ void Actor::setActorRotation(const glm::vec3 rotation)
 }
 
 
-void Actor::setActorScale(const glm::vec3 scale)
+void Actor::setActorScale(const glm::vec3& scale)
 {
     if (!hasUpdatedSinceLastDraw)
         hasUpdatedSinceLastDraw = true;
@@ -102,19 +102,19 @@ void Actor::setActorScale(const glm::vec3 scale)
 }
 
 
-void Actor::addActorLocation(const glm::vec3 addLocation)
+void Actor::addActorLocation(const glm::vec3& addLocation)
 {
     setActorLocation(worldTransform.worldLocation + addLocation * deltaTime);
 }
 
 
-void Actor::addActorRotation(const glm::vec3 addRotation)
+void Actor::addActorRotation(const glm::vec3& addRotation)
 {
     setActorRotation(worldTransform.worldRotation + addRotation * deltaTime);
 }
 
 
-void Actor::addActorScale(const glm::vec3 addScale)
+void Actor::addActorScale(const glm::vec3& addScale)
 {
     setActorScale(worldTransform.worldScale + addScale * deltaTime);
 }
@@ -130,7 +130,7 @@ void Actor::setActive(const bool active)
     isActive = active;
 }
 
-void Actor::setCollisionProfile(const CollisionProfile cp)
+void Actor::setCollisionProfile(const CollisionProfile& cp)
 {
     collisionProfile = cp;
 }

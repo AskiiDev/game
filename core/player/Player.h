@@ -30,7 +30,7 @@ struct Camera
     double yaw;
     double pitch;
     
-    glm::mat4 getViewProjMatrix()
+    const glm::mat4 getViewProjMatrix()
     {
         return projMatrix * viewMatrix;
     }
@@ -58,17 +58,18 @@ public:
     
     Camera getCamera() { return camera; }
     
-    void setProjectionMatrix(glm::mat4 proj);
+    void setProjectionMatrix(const glm::mat4& proj);
     
-    void addCameraYaw(float yaw);
-    void addCameraPitch(float pitch);
+    void addCameraYaw(const float yaw);
+    void addCameraPitch(const float pitch);
     
     void updateCameraVectors();
     
-    glm::vec3 getPlayerVelocity(float deltaTime);
+    glm::vec3 getPlayerVelocity();
     glm::vec3 getPlayerLocation();
     
-    void movePlayerDelta(glm::vec3 deltaLocation);
+    void movePlayer(const glm::vec3& newLocation);
+    glm::vec3 predictNextPlayerLocation(const glm::vec3& deltaLocation, const float deltaTime);
 };
 
 #endif

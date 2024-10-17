@@ -33,8 +33,13 @@ bool inDistanceForCollisionCheck(const glm::vec3 playerLocation, Actor& actor)
  * @param max The maximum corner of the bounding box (i.e., the "top-right-front" corner).
  * @param[out] collisionNormal The calculated collision normal, which will be set to the appropriate direction (x, y, or z axis).
  */
-void calculateBoundingBoxCollisionNormal(const glm::vec3 worldLocation, const glm::vec3 min, const glm::vec3 max, glm::vec3& collisionNormal) {
-    
+void calculateBoundingBoxCollisionNormal(
+    const glm::vec3 worldLocation,
+    const glm::vec3 min,
+    const glm::vec3 max,
+    glm::vec3& collisionNormal
+)
+{
     glm::vec3 deltaMin = worldLocation - min;
     glm::vec3 deltaMax = max - worldLocation;
 
@@ -58,22 +63,53 @@ void calculateBoundingBoxCollisionNormal(const glm::vec3 worldLocation, const gl
  * If the sphere is inside the bounding box, the function calculates the collision normal using the
  * `calculateCollisionNormal` function.
  *
- * @param worldLocation The world location of the center of the sphere.
+ * @param sphereOrigin The world location of the center of the sphere.
  * @param min The minimum corner of the bounding box.
  * @param max The maximum corner of the bounding box.
  * @param[out] collisionNormal The calculated collision normal, which will be set if a collision is detected.
  * @param radius The radius of the sphere (default is 0.12).
  * @return True if the sphere is inside the bounding box, false otherwise.
  */
-bool isSphereInBoundingBox(const glm::vec3 worldLocation, const glm::vec3 min, const glm::vec3 max, glm::vec3& collisionNormal, const float radius = 0.12)
+bool isSphereInBoundingBox(
+    const glm::vec3& sphereOrigin,
+    const glm::vec3& min,
+    const glm::vec3& max,
+    glm::vec3& collisionNormal,
+    const float radius
+)
 {
-    if (worldLocation.x >= min.x - radius && worldLocation.x <= max.x + radius &&
-        worldLocation.y >= min.y - radius && worldLocation.y <= max.y + radius &&
-        worldLocation.z >= min.z - radius && worldLocation.z <= max.z + radius) {
-        
-        calculateBoundingBoxCollisionNormal(worldLocation, min, max, collisionNormal);
+    if (sphereOrigin.x >= min.x - radius && sphereOrigin.x <= max.x + radius &&
+        sphereOrigin.y >= min.y - radius && sphereOrigin.y <= max.y + radius &&
+        sphereOrigin.z >= min.z - radius && sphereOrigin.z <= max.z + radius)
+    {
+        calculateBoundingBoxCollisionNormal(sphereOrigin, min, max, collisionNormal);
         
         return true;
+    }
+    
+    return false;
+}
+
+bool isCapsuleInBoundingBox(
+    const glm::vec3& capsuleOrigin,
+    const glm::vec3& capsuleOrientation,
+    const glm::vec3& min,
+    const glm::vec3& max,
+    glm::vec3& collisionNormal,
+    const float halfHeight,
+    const float radius
+)
+{
+    glm::vec3 closestPoint = glm::clamp(capsuleOrigin, min, max);
+    glm::vec3 axisPoint = capsuleOrigin + glm::dot(closestPoint - capsuleOrigin, capsuleOrientation) * capsuleOrientation;
+    
+    float distance = glm::distance(axisPoint, capsuleOrigin);
+    
+    
+    if (distance * distance <= halfHeight * halfHeight)
+    {
+        if (isSphereInBoundingBox(axisPoint, min, max, collisionNormal, radius))
+            return true;
     }
     
     return false;

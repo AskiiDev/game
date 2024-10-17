@@ -34,5 +34,10 @@ enum CollisionProfile
     CW_DEFAULT = (CW_PLAYER | CW_ACTOR)
 };
 
+struct CollisionSurface
+{
+    float friction = 1.f;
+};
+
 
 #endif

@@ -50,24 +50,24 @@ public:
     std::vector<glm::vec3> getBoundingBoxCorners();
     float getApproximateBoundingRadius();
     
-    CollisionProfile getCollisionProfile() { return collisionProfile; }
-    bool getCulled() { return isCulled; }
-    bool getActive() { return isActive; }
+    CollisionProfile getCollisionProfile() const { return collisionProfile; }
+    bool getCulled() const { return isCulled; }
+    bool getActive() const { return isActive; }
     
     
     // Setters
-    void setActorLocation(const glm::vec3 location);
-    void setActorRotation(const glm::vec3 rotation);
-    void setActorScale(const glm::vec3 scale);
+    void setActorLocation(const glm::vec3& location);
+    void setActorRotation(const glm::vec3& rotation);
+    void setActorScale(const glm::vec3& scale);
     
-    void addActorLocation(const glm::vec3 addLocation);
-    void addActorRotation(const glm::vec3 addRotation);
-    void addActorScale(const glm::vec3 addScale);
+    void addActorLocation(const glm::vec3& addLocation);
+    void addActorRotation(const glm::vec3& addRotation);
+    void addActorScale(const glm::vec3& addScale);
     
     void setCulled(const bool occlude);
     void setActive(const bool active);
     
-    void setCollisionProfile(const CollisionProfile cp);
+    void setCollisionProfile(const CollisionProfile& cp);
     
 
 private:

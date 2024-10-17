@@ -18,9 +18,7 @@ void Player::init()
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
     camera.yaw = 90.f;
-    camera.pitch = 0.f;
-
-    updateCameraVectors();
+    camera.pitch = 80.f;
 }
 
 
@@ -49,13 +47,13 @@ void Player::updateCameraVectors()
 }
 
 
-void Player::setProjectionMatrix(glm::mat4 proj)
+void Player::setProjectionMatrix(const glm::mat4& proj)
 {
     camera.projMatrix = proj;
 }
 
 
-glm::vec3 Player::getPlayerVelocity(float deltaTime)
+glm::vec3 Player::getPlayerVelocity()
 {
     glm::vec3 mask = glm::vec3(1, 1, 1);
     
@@ -89,25 +87,20 @@ glm::vec3 Player::getPlayerVelocity(float deltaTime)
     {
         desiredMovement = glm::normalize(desiredMovement);
     }
-
-    glm::vec3 targetVelocity = desiredMovement * playerSpeed;
-
-    if (glm::length(targetVelocity) > 0.0f)
-    {
-        playerVelocity = glm::mix(playerVelocity, targetVelocity, acceleration * deltaTime);
-    }
-    else
-    {
-        playerVelocity = glm::mix(playerVelocity, glm::vec3(0.0f), deceleration * deltaTime);
-    }
-
-    return playerVelocity * deltaTime;
+    
+    return desiredMovement * playerSpeed;
 }
 
 
-void Player::movePlayerDelta(glm::vec3 deltaLocation)
+glm::vec3 Player::predictNextPlayerLocation(const glm::vec3& deltaLocation, const float deltaTime)
 {
-    camera.worldLocation += deltaLocation;
+    return camera.worldLocation + (deltaLocation * deltaTime);
+}
+
+
+void Player::movePlayer(const glm::vec3& newLocation)
+{
+    camera.worldLocation = newLocation;
 }
 
 
@@ -116,14 +109,12 @@ glm::vec3 Player::getPlayerLocation()
     return camera.worldLocation;
 }
 
-
-void Player::addCameraYaw(float yaw)
-{\
+void Player::addCameraYaw(const float yaw)
+{
     camera.yaw += yaw;
 }
 
-
-void Player::addCameraPitch(float pitch)
+void Player::addCameraPitch(const float pitch)
 {
     camera.pitch = std::clamp(camera.pitch - pitch, cameraPitchMin, cameraPitchMax);
 }

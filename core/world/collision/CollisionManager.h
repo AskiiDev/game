@@ -21,7 +21,7 @@
  * @param[out] collisionNormal The calculated collision normal if a collision occurs.
  * @return True if the player collides with any actor, false otherwise.
  */
-bool doesPlayerCollideWithActors(const glm::vec3 playerLocation, std::vector<Actor>& worldActors, glm::vec3& collisionNormal)
+bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Actor>& worldActors, glm::vec3& collisionNormal)
 {
     for (Actor& actor : worldActors)
     {
@@ -32,7 +32,7 @@ bool doesPlayerCollideWithActors(const glm::vec3 playerLocation, std::vector<Act
         
         BoundingBox box = actor.getBoundingBox();
 
-        if (isSphereInBoundingBox(playerLocation, box.min, box.max, collisionNormal, PLAYER_COLLISION_RADIUS))
+        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
         {
             return true;
         }
@@ -54,29 +54,31 @@ bool doesPlayerCollideWithActors(const glm::vec3 playerLocation, std::vector<Act
  */
 void movePlayerWithCollision(Player* player, std::vector<Actor>& worldActors, const float deltaTime)
 {
-    glm::vec3 playerVelocity = player->getPlayerVelocity(deltaTime);
-    glm::vec3 playerLocation = player->getPlayerLocation();
+    glm::vec3 playerVelocity = player->getPlayerVelocity();
+    glm::vec3 nextLocation = player->predictNextPlayerLocation(playerVelocity, deltaTime);
     
     glm::vec3 collisionNormal;
-    if (!doesPlayerCollideWithActors(playerLocation + playerVelocity, worldActors, collisionNormal))
+    if (!doesPlayerCollideWithActors(nextLocation, worldActors, collisionNormal))
     {
-        player->movePlayerDelta(playerVelocity);
+        player->movePlayer(nextLocation);
     }
     else
     {
         glm::vec3 slideVelocity = playerVelocity - glm::dot(playerVelocity, collisionNormal) * collisionNormal;
         
-        if (!doesPlayerCollideWithActors(playerLocation + slideVelocity, worldActors, collisionNormal))
+        
+        nextLocation = player->predictNextPlayerLocation(slideVelocity, deltaTime);
+        if (!doesPlayerCollideWithActors(nextLocation, worldActors, collisionNormal))
         {
-            player->movePlayerDelta(slideVelocity);
+            player->movePlayer(nextLocation);
         }
         else
         {
             // If the player still collides, slightly adjust the movement to nudge them away from the edge
-            glm::vec3 smallNudge = PLAYER_PUSH_OUT_OF_OBJECT_FORCE * collisionNormal * deltaTime;
-            glm::vec3 nudgeMoveLocation = slideVelocity + smallNudge;
+            glm::vec3 smallNudge = PLAYER_PUSH_OUT_OF_OBJECT_FORCE * collisionNormal;
+            glm::vec3 nudgeVelocity = slideVelocity + smallNudge;
 
-            player->movePlayerDelta(nudgeMoveLocation);
+            player->movePlayer(player->predictNextPlayerLocation(nudgeVelocity, deltaTime));
         }
     }
 }
