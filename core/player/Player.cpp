@@ -17,8 +17,8 @@ void Player::init()
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
-    camera.yaw = 90.f;
-    camera.pitch = 80.f;
+    camera.yaw = 110.f;
+    camera.pitch = -30.f;
 }
 
 
@@ -88,7 +88,16 @@ glm::vec3 Player::getPlayerVelocity()
         desiredMovement = glm::normalize(desiredMovement);
     }
     
-    return desiredMovement * playerSpeed;
+    
+    playerVelocity *= 0.5;
+    
+    return addPlayerVelocity(desiredMovement * playerSpeed);
+}
+
+
+glm::vec3 Player::addPlayerVelocity(const glm::vec3& velocity)
+{
+    return (playerVelocity += velocity);
 }
 
 
@@ -104,7 +113,7 @@ void Player::movePlayer(const glm::vec3& newLocation)
 }
 
 
-glm::vec3 Player::getPlayerLocation()
+glm::vec3 Player::getPlayerLocation() const
 {
     return camera.worldLocation;
 }
@@ -118,3 +127,9 @@ void Player::addCameraPitch(const float pitch)
 {
     camera.pitch = std::clamp(camera.pitch - pitch, cameraPitchMin, cameraPitchMax);
 }
+
+
+//void Player::jump()
+//{
+//    jumpFrames = 15;
+//}

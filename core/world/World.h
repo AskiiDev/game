@@ -8,7 +8,6 @@
 class World {
 private:
     Player player;
-    glm::mat4 lastViewMatrix;
     std::vector<Actor> worldActors;
     
 public:
@@ -18,7 +17,6 @@ public:
     void update(float deltaTime);
     
     std::vector<Actor> getWorldActors() { return worldActors; }
-    
     Player* getPlayerAsRef();
     
 private:

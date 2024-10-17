@@ -22,6 +22,7 @@ bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Ac
 
         if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionResult.collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
         {
+            collisionResult.collisionPoint = playerLocation;
             collisionResult.collisionSurface = actor.getCollisionSurface();
             return true;
         }
@@ -44,6 +45,9 @@ bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Ac
 void movePlayerWithCollision(Player* player, std::vector<Actor>& worldActors, const float deltaTime)
 {
     glm::vec3 playerVelocity = player->getPlayerVelocity();
+//    std::cout << 1 << std::endl;
+//    playerVelocity -= glm::vec3(0, 0, 0);
+    
     glm::vec3 nextLocation = player->predictNextPlayerLocation(playerVelocity, deltaTime);
     
     CollisionResult collisionResult;

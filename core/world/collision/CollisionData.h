@@ -34,16 +34,25 @@ enum CollisionProfile
     CW_DEFAULT = (CW_PLAYER | CW_ACTOR)
 };
 
+enum SurfaceType
+{
+    DEFAULT
+};
+
 struct CollisionSurface
 {
     // from 0 to 1
-    float friction = 0.f;
+    float friction = 0.5f;
+    SurfaceType surfaceType = SurfaceType::DEFAULT;
 };
 
 
 struct CollisionResult
 {
+    glm::vec3 collisionPoint;
     glm::vec3 collisionNormal;
+    glm::vec3 impactVelocity;
+    
     CollisionSurface collisionSurface;
 };
 

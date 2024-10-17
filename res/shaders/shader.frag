@@ -46,5 +46,5 @@ void main()
     
     outColor = vec4(bayer * pow(col, vec3(0.4)), 1.0);
     outColor *= 2;
-//    outColor = bayer;
+//    outColor = vec4(bayer, 1.0;
 }

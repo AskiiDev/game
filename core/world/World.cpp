@@ -16,7 +16,7 @@ void World::load()
     Transform t;
     Object o;
     
-    t = { glm::vec3(-0.f, -0.f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    t = { glm::vec3(0.f, -2.f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
     o = loadObject("res/models/viking_room.obj", 0);
     Actor a(o, t);
     

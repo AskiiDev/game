@@ -66,10 +66,20 @@ public:
     void updateCameraVectors();
     
     glm::vec3 getPlayerVelocity();
-    glm::vec3 getPlayerLocation();
+    glm::vec3 getPlayerLocation() const;
+    
+    glm::vec3 addPlayerVelocity(const glm::vec3& velocity);
     
     void movePlayer(const glm::vec3& newLocation);
+    
     glm::vec3 predictNextPlayerLocation(const glm::vec3& deltaLocation, const float deltaTime);
+    
+    
+    // testing
+//    int jumpFrames = 0;
+//    int gravFrames = 0;
+//    
+//    void jump();
 };
 
 #endif

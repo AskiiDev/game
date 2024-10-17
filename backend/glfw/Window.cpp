@@ -48,12 +48,16 @@ void Window::init(void* pointer, World* w)
 
 void Window::update()
 {
+    float dt = std::chrono::duration<float>(deltaTime).count();
     glfwPollEvents();
     
     if (!isFocused)
     {
         player->mvDirection = 0;
     }
+    
+    world->update(dt);
+    updateCursorDelta();
     
 //    if (deltaTime < FRAME_DURATION)
 //    {
@@ -62,12 +66,7 @@ void Window::update()
 //    }
     
     deltaTime = std::chrono::high_resolution_clock::now() - previousTime;
-    float dt = std::chrono::duration<float>(deltaTime).count();
 //    printf("FPS: %f\n", 1.f / dt);
-    
-    updateCursorDelta();
-    
-    world->update(dt);
 
     previousTime = std::chrono::high_resolution_clock::now();
 }
@@ -187,7 +186,8 @@ void Window::handleKeyboardInput(int key, int scancode, int action, int mods)
         
         if (key == GLFW_KEY_SPACE)
         {
-            toggleFullscreen();
+//            player->jump();
+//            toggleFullscreen();
         }
                 
         if (key == GLFW_KEY_W)
