@@ -20,6 +20,11 @@ void World::load()
     o = loadObject("res/models/viking_room.obj", 0);
     Actor a(o, t);
     
+    CollisionSurface surface;
+    surface.friction = 0.5f;
+    
+    a.setCollisionSurface(surface);
+    
     t = { glm::vec3(1.2f, 1.5f, 1.1f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f) };
     o = loadObject("res/models/sword/sword.obj", 1);
 //    o = loadObject("res/models/chateau.obj", 0);

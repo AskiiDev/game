@@ -4,7 +4,7 @@
 
 #include "Actor.h"
 #include <glm/glm.hpp>
-#include "CollisionProfile.h"
+#include "CollisionData.h"
 #include "CollisionConstants.h"
 
 

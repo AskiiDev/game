@@ -36,7 +36,15 @@ enum CollisionProfile
 
 struct CollisionSurface
 {
-    float friction = 1.f;
+    // from 0 to 1
+    float friction = 0.f;
+};
+
+
+struct CollisionResult
+{
+    glm::vec3 collisionNormal;
+    CollisionSurface collisionSurface;
 };
 
 

@@ -2,7 +2,7 @@
 #define ACTOR_H
 
 #include "VulkanUtils.h"
-#include "CollisionProfile.h"
+#include "CollisionData.h"
 
 
 class Actor {
@@ -15,6 +15,7 @@ protected:
     Transform worldTransform;
     
     CollisionProfile collisionProfile = CollisionProfile::CW_DEFAULT;
+    CollisionSurface collisionSurface;
     
     float deltaTime;
     
@@ -51,6 +52,8 @@ public:
     float getApproximateBoundingRadius();
     
     CollisionProfile getCollisionProfile() const { return collisionProfile; }
+    CollisionSurface getCollisionSurface() const { return collisionSurface; }
+    
     bool getCulled() const { return isCulled; }
     bool getActive() const { return isActive; }
     
@@ -68,6 +71,7 @@ public:
     void setActive(const bool active);
     
     void setCollisionProfile(const CollisionProfile& cp);
+    void setCollisionSurface(const CollisionSurface& cs);
     
 
 private:

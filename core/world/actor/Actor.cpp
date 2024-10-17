@@ -135,6 +135,11 @@ void Actor::setCollisionProfile(const CollisionProfile& cp)
     collisionProfile = cp;
 }
 
+void Actor::setCollisionSurface(const CollisionSurface& cs)
+{
+    collisionSurface = cs;
+}
+
 
 BoundingBox Actor::getBoundingBox()
 {

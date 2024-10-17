@@ -5,23 +5,11 @@
 #include "Actor.h"
 #include "Player.h"
 #include "CollisionUtils.h"
-#include "CollisionProfile.h"
+#include "CollisionData.h"
 #include "CollisionConstants.h"
 
 
-/**
- * @brief Checks if the player collides with any actors in the world and calculates the collision normal if a collision occurs.
- *
- * This function iterates over all actors in the world and checks for collisions between the player and actors
- * using the actor's collision profile and bounding box. If a collision is detected, it calculates the
- * collision normal using `isSphereInBoundingBox`.
- *
- * @param playerLocation The current world location of the player.
- * @param worldActors A vector of actors in the world to check for collisions.
- * @param[out] collisionNormal The calculated collision normal if a collision occurs.
- * @return True if the player collides with any actor, false otherwise.
- */
-bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Actor>& worldActors, glm::vec3& collisionNormal)
+bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Actor>& worldActors, CollisionResult& collisionResult)
 {
     for (Actor& actor : worldActors)
     {
@@ -32,8 +20,9 @@ bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Ac
         
         BoundingBox box = actor.getBoundingBox();
 
-        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
+        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionResult.collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
         {
+            collisionResult.collisionSurface = actor.getCollisionSurface();
             return true;
         }
     }
@@ -57,18 +46,30 @@ void movePlayerWithCollision(Player* player, std::vector<Actor>& worldActors, co
     glm::vec3 playerVelocity = player->getPlayerVelocity();
     glm::vec3 nextLocation = player->predictNextPlayerLocation(playerVelocity, deltaTime);
     
-    glm::vec3 collisionNormal;
-    if (!doesPlayerCollideWithActors(nextLocation, worldActors, collisionNormal))
+    CollisionResult collisionResult;
+    
+    if (!doesPlayerCollideWithActors(nextLocation, worldActors, collisionResult))
     {
         player->movePlayer(nextLocation);
     }
     else
     {
+        glm::vec3 collisionNormal = collisionResult.collisionNormal;
+        CollisionSurface surface = collisionResult.collisionSurface;
+        
         glm::vec3 slideVelocity = playerVelocity - glm::dot(playerVelocity, collisionNormal) * collisionNormal;
         
+        glm::vec3 frictionForce = -surface.friction * slideVelocity;
+        glm::vec3 frictionVelocity = slideVelocity + frictionForce;
+
+        if (glm::length(frictionVelocity) > glm::length(slideVelocity)) {
+            frictionVelocity = glm::vec3(0.0f);
+        }
+        
+        slideVelocity = frictionVelocity;
         
         nextLocation = player->predictNextPlayerLocation(slideVelocity, deltaTime);
-        if (!doesPlayerCollideWithActors(nextLocation, worldActors, collisionNormal))
+        if (!doesPlayerCollideWithActors(nextLocation, worldActors, collisionResult))
         {
             player->movePlayer(nextLocation);
         }
