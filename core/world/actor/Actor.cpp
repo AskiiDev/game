@@ -15,7 +15,7 @@ Actor::Actor(const Object o, const Transform t, const CollisionProfile cp) : Act
 }
 
 
-void Actor::update(float dt)
+void Actor::update(const float dt)
 {
     deltaTime = dt;
 }
@@ -24,6 +24,8 @@ void Actor::update(float dt)
 glm::vec3 Actor::getWorldLocation() const { return worldTransform.worldLocation; }
 glm::vec3 Actor::getWorldRotation() const { return worldTransform.worldRotation; }
 glm::vec3 Actor::getWorldScale() const { return worldTransform.worldScale; }
+
+glm::vec3 Actor::getActorVelocity() const { return actorVelocity; }
 
 glm::mat4 Actor::getModelMatrix() const
 {
@@ -101,24 +103,26 @@ void Actor::setActorScale(const glm::vec3& scale)
     worldTransform.worldScale = scale;
 }
 
-
 void Actor::addActorLocation(const glm::vec3& addLocation)
 {
     setActorLocation(worldTransform.worldLocation + addLocation * deltaTime);
+    setActorVelocity(addLocation);
 }
-
 
 void Actor::addActorRotation(const glm::vec3& addRotation)
 {
     setActorRotation(worldTransform.worldRotation + addRotation * deltaTime);
 }
 
-
 void Actor::addActorScale(const glm::vec3& addScale)
 {
     setActorScale(worldTransform.worldScale + addScale * deltaTime);
 }
 
+void Actor::setActorVelocity(const glm::vec3 &velocity)
+{
+    actorVelocity = velocity;
+}
 
 void Actor::setCulled(const bool occlude)
 {

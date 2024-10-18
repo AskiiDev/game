@@ -9,7 +9,84 @@
 #include "CollisionConstants.h"
 
 
-bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Actor>& worldActors, CollisionResult& collisionResult)
+bool doesActorCollideWithActor(
+    const glm::vec3& playerLocation,
+    Actor& actorA,
+    Actor& actorB,
+    CollisionResult& collisionResultA,
+    CollisionResult& collisionResultB
+)
+{
+    if (&actorA == &actorB)
+    {
+        return false;
+    }
+    
+    if (!collisionProfileEnabled(actorA, CW_ACTOR) ||
+        !collisionProfileEnabled(actorB, CW_ACTOR))
+    {
+        return false;
+    }
+    
+    if (!inDistanceForCollisionCheck(playerLocation, actorA) && !inDistanceForCollisionCheck(playerLocation, actorB))
+    {
+        return false;
+    }
+    
+    
+    BoundingBox aBox = actorA.getBoundingBox();
+    BoundingBox bBox = actorB.getBoundingBox();
+    
+    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResultA.collisionNormal))
+    {
+        calculateBoundingBoxCollisionNormal(actorB.getWorldLocation(), aBox.min, aBox.max, collisionResultB.collisionNormal);
+        
+        collisionResultA.collisionSurface = actorB.getCollisionSurface();
+        collisionResultA.collisionPoint = actorA.getWorldLocation();
+        collisionResultA.impactVelocity = actorA.getActorVelocity();
+        
+        collisionResultB.collisionSurface = actorA.getCollisionSurface();
+        collisionResultB.collisionPoint = actorB.getWorldLocation();
+        collisionResultB.impactVelocity = actorB.getActorVelocity();
+        
+        return true;
+    }
+    
+    return false;
+}
+
+
+void collideWorldActors(
+    const glm::vec3& playerLocation,
+    std::vector<Actor>& worldActors,
+    const float deltaTime
+)
+{
+    for (Actor& actorA : worldActors)
+    {
+        for (Actor& actorB : worldActors)
+        {
+            CollisionResult collisionResultA;
+            CollisionResult collisionResultB;
+            
+            if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResultA, collisionResultB))
+            {
+                glm::vec3 nudgeA = glm::length(collisionResultA.impactVelocity) * collisionResultA.collisionNormal;
+                glm::vec3 nudgeB = glm::length(collisionResultB.impactVelocity) * collisionResultB.collisionNormal;
+                
+                actorA.addActorLocation(nudgeA);
+                actorB.addActorLocation(nudgeB);
+            }
+        }
+    }
+}
+
+
+bool doesPlayerCollideWithActors(
+    const glm::vec3& playerLocation,
+    std::vector<Actor>& worldActors,
+    CollisionResult& collisionResult
+)
 {
     for (Actor& actor : worldActors)
     {
@@ -20,8 +97,7 @@ bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Ac
         
         BoundingBox box = actor.getBoundingBox();
 
-        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionResult.collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
-        {
+        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionResult.collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS)) {
             collisionResult.collisionPoint = playerLocation;
             collisionResult.collisionSurface = actor.getCollisionSurface();
             return true;
@@ -42,12 +118,13 @@ bool doesPlayerCollideWithActors(const glm::vec3& playerLocation, std::vector<Ac
  * @param worldActors A vector of actors in the world to check for collisions.
  * @param deltaTime The time delta used to update the player's velocity and movement.
  */
-void movePlayerWithCollision(Player* player, std::vector<Actor>& worldActors, const float deltaTime)
+void movePlayerWithCollision(
+    Player* player,
+    std::vector<Actor>& worldActors,
+    const float deltaTime
+)
 {
     glm::vec3 playerVelocity = player->getPlayerVelocity();
-//    std::cout << 1 << std::endl;
-//    playerVelocity -= glm::vec3(0, 0, 0);
-    
     glm::vec3 nextLocation = player->predictNextPlayerLocation(playerVelocity, deltaTime);
     
     CollisionResult collisionResult;
@@ -79,11 +156,11 @@ void movePlayerWithCollision(Player* player, std::vector<Actor>& worldActors, co
         }
         else
         {
-            // If the player still collides, slightly adjust the movement to nudge them away from the edge
+            // if the player still collides, slightly adjust the movement to nudge them away from the edge
             glm::vec3 smallNudge = PLAYER_PUSH_OUT_OF_OBJECT_FORCE * collisionNormal;
             glm::vec3 nudgeVelocity = slideVelocity + smallNudge;
 
-            player->movePlayer(player->predictNextPlayerLocation(nudgeVelocity, deltaTime));
+            player->movePlayer(player->predictNextPlayerLocation(smallNudge, deltaTime));
         }
     }
 }

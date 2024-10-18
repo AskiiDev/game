@@ -2,7 +2,10 @@
 #include <array>
 
 
-void frustumCullActors(Player& player, std::vector<Actor>& worldActors)
+void frustumCullActors(
+    Player& player,
+    std::vector<Actor>& worldActors
+)
 {
     std::array<std::array<float, 4>, 6> planes = player.getCamera().planes;
 

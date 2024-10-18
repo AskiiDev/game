@@ -16,9 +16,12 @@ void World::load()
     Transform t;
     Object o;
     
-    t = { glm::vec3(0.f, -2.f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    o = loadObject("res/models/viking_room.obj", 0);
+    t = { glm::vec3(0.f, 0.f, 12.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    o = loadObject("res/models/dog.obj", 0);
     Actor a(o, t);
+    
+    t = { glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    Actor d(o, t);
     
     CollisionSurface surface;
     surface.friction = 0.5f;
@@ -35,20 +38,13 @@ void World::load()
     
     
     pushActor(a);
-    pushActor(b);
-    pushActor(c);
+    pushActor(d);
+//    pushActor(b);
+//    pushActor(c);
 }
 
-
-void World::update(float deltaTime)
+void World::update(const float deltaTime)
 {
-    // update player
-    movePlayerWithCollision(getPlayerAsRef(), worldActors, deltaTime);
-    getPlayerAsRef()->updateCameraVectors();
-    
-    // actor culling
-    frustumCullActors(player, worldActors);
-    
     // update actors
     for (Actor& actor : worldActors)
     {
@@ -58,7 +54,24 @@ void World::update(float deltaTime)
         }
     }
     
+    worldActors[0].addActorLocation(glm::vec3(0, 0, -1));
+    worldActors[1].addActorLocation(glm::vec3(0, 0, 0.5));
     
+    
+    collideWorldActors(player.getPlayerLocation(), worldActors, deltaTime);
+    
+    movePlayerWithCollision(getPlayerAsRef(), worldActors, deltaTime);
+    getPlayerAsRef()->updateCameraVectors();
+    
+    // actor culling
+    frustumCullActors(player, worldActors);
+    
+//    worldActors[0].addActorRotation(glm::vec3(0, 45, 0));
+    
+    // elise cantrill ???
+//    worldActors[0].setActorScale(glm::vec3(cos(glfwGetTime()) + 1,
+//                                           sin(glfwGetTime()) + 1,
+//                                           sin(glfwGetTime()) * cos(glfwGetTime()) + 1));
     
 //    glm::vec3 fv = getPlayerAsRef()->getCamera().forwardVector;
 //    glm::vec3 rv = getPlayerAsRef()->getCamera().rightVector;
@@ -79,14 +92,13 @@ void World::update(float deltaTime)
 //    worldActors[1].setActorRotation(finalRotation);
 }
 
-
 Player* World::getPlayerAsRef()
 {
     return &player;
 }
 
-
-void World::pushActor(Actor newActor)
+void World::pushActor(Actor& newActor)
 {
     worldActors.push_back(newActor);
 }
+

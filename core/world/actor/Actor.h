@@ -14,6 +14,8 @@ protected:
     Object obj;
     Transform worldTransform;
     
+    glm::vec3 actorVelocity;
+    
     CollisionProfile collisionProfile = CollisionProfile::CW_DEFAULT;
     CollisionSurface collisionSurface;
     
@@ -29,13 +31,15 @@ public:
     Actor(const Object o, const Transform t);
     Actor(const Object o, const Transform t, const CollisionProfile cp);
     
-    void update(float deltaTime);
+    void update(const float deltaTime);
     
 
     // Getters
     glm::vec3 getWorldLocation() const;
     glm::vec3 getWorldRotation() const;
     glm::vec3 getWorldScale() const;
+    
+    glm::vec3 getActorVelocity() const;
     
     glm::mat4 getModelMatrix() const;
     
@@ -67,16 +71,13 @@ public:
     void addActorRotation(const glm::vec3& addRotation);
     void addActorScale(const glm::vec3& addScale);
     
+    void setActorVelocity(const glm::vec3& velocity);
+    
     void setCulled(const bool occlude);
     void setActive(const bool active);
     
     void setCollisionProfile(const CollisionProfile& cp);
     void setCollisionSurface(const CollisionSurface& cs);
-    
-
-private:
-    
-    
 };
 
 #endif

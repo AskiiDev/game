@@ -75,6 +75,11 @@ namespace std
 struct BoundingBox {
     glm::vec3 min;
     glm::vec3 max;
+    
+    float size()
+    {
+        return glm::distance(min, max) * 1.0f;
+    }
 };
 
 

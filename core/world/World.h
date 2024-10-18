@@ -14,13 +14,14 @@ public:
     World();
     
     void load();
-    void update(float deltaTime);
+    void update(const float deltaTime);
     
-    std::vector<Actor> getWorldActors() { return worldActors; }
     Player* getPlayerAsRef();
     
+    std::vector<Actor> getWorldActors() const { return worldActors; }
+    
 private:
-    void pushActor(Actor newActor);
+    void pushActor(Actor& newActor);
     
 };
 

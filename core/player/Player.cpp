@@ -18,7 +18,7 @@ void Player::init()
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
     camera.yaw = 110.f;
-    camera.pitch = -30.f;
+//    camera.pitch = -30.f;
 }
 
 

@@ -8,12 +8,19 @@
 #include "CollisionConstants.h"
 
 
-bool collisionProfileEnabled(Actor& actor, CollisionProfile profile)
+bool collisionProfileEnabled(
+    Actor& actor,
+    CollisionProfile profile
+)
 {
     return actor.getCollisionProfile() & profile;
 }
 
-bool inDistanceForCollisionCheck(const glm::vec3 playerLocation, Actor& actor)
+
+bool inDistanceForCollisionCheck(
+    const glm::vec3 playerLocation,
+    Actor& actor
+)
 {
     if (!actor.getActive())
         return false;
@@ -54,6 +61,28 @@ void calculateBoundingBoxCollisionNormal(
         collisionNormal = glm::vec3(0.0f, (deltaMin.y < deltaMax.y) ? -1.0f : 1.0f, 0.0f);
     else
         collisionNormal = glm::vec3(0.0f, 0.0f, (deltaMin.z < deltaMax.z) ? -1.0f : 1.0f);
+}
+
+bool isBoxInBoundingBox(
+    const glm::vec3& amin,
+    const glm::vec3& amax,
+    const glm::vec3& bmin,
+    const glm::vec3& bmax,
+    glm::vec3& collisionNormal
+)
+{
+    if (amax.x < bmin.x || amin.x > bmax.x)
+       return false;
+    
+   if (amax.y < bmin.y || amin.y > bmax.y)
+       return false;
+    
+   if (amax.z < bmin.z || amin.z > bmax.z)
+       return false;
+    
+    calculateBoundingBoxCollisionNormal((amin + amax) * 0.5f, bmin, bmax, collisionNormal);
+    
+    return true;
 }
 
 /**
@@ -103,8 +132,7 @@ bool isCapsuleInBoundingBox(
     glm::vec3 closestPoint = glm::clamp(capsuleOrigin, min, max);
     glm::vec3 axisPoint = capsuleOrigin + glm::dot(closestPoint - capsuleOrigin, capsuleOrientation) * capsuleOrientation;
     
-    float distance = glm::distance(axisPoint, capsuleOrigin);
-    
+    float distance = glm::distance(axisPoint, capsuleOrigin);    
     
     if (distance * distance <= halfHeight * halfHeight)
     {

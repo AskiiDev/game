@@ -7,24 +7,10 @@
  * @brief Enum representing different collision profiles for game entities.
  *
  * This enum defines various collision profiles used in the game to categorize
- * entities based on their interaction types. The values can be combined using
- * bitwise operations to create custom collision profiles.
- *
- * @var CollisionProfile::CW_NONE
- * No collision profile assigned.
- *
- * @var CollisionProfile::CW_PLAYER
- * Collision profile for player entities. This profile is used to detect
- * collisions specific to player interactions.
- *
- * @var CollisionProfile::CW_ACTOR
- * Collision profile for non-player actor entities. This profile is used
- * to handle collisions between various actors in the game.
- *
- * @var CollisionProfile::CW_DEFAULT
- * Default collision profile that includes both player and actor profiles.
- * This profile is useful for scenarios where both types of interactions
- * need to be considered simultaneously.
+ * entities based on their interaction types. These profiles help to manage
+ * how different types of game entities interact and collide with each other.
+ * The enum values can be combined using bitwise operations to create custom
+ * profiles for more complex collision handling.
  */
 enum CollisionProfile
 {
@@ -34,19 +20,41 @@ enum CollisionProfile
     CW_DEFAULT = (CW_PLAYER | CW_ACTOR)
 };
 
+/**
+ * @enum SurfaceType
+ * @brief Enum representing different types of surfaces for collision detection.
+ *
+ * This enum defines the type of surface involved in a collision.
+ */
 enum SurfaceType
 {
     DEFAULT
 };
 
+/**
+ * @struct CollisionSurface
+ * @brief Struct representing surface properties involved in a collision.
+ *
+ * This structure holds properties of the surface where the collision occurred,
+ * such as the friction coefficient and the type of surface. These properties
+ * influence the behavior of objects during and after the collision.
+ */
 struct CollisionSurface
 {
     // from 0 to 1
     float friction = 0.5f;
+    
     SurfaceType surfaceType = SurfaceType::DEFAULT;
 };
 
-
+/**
+ * @struct CollisionResult
+ * @brief Struct representing the result of a collision between entities.
+ *
+ * This structure contains information about a collision event, including the
+ * point of collision, the normal vector at the collision point, the velocity
+ * at impact, and the properties of the surface where the collision occurred.
+ */
 struct CollisionResult
 {
     glm::vec3 collisionPoint;
