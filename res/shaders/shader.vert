@@ -34,7 +34,8 @@ vec4 snap(vec4 vertex, vec2 res)
 void main()
 {
     // Apply model matrix from push constants
-    gl_Position = snap(ubo.proj * ubo.view * pc.modelMatrix * vec4(inPosition, 1.0), vec2(256.0/1.5, 224.0/1.5));
+//    gl_Position = ubo.proj * ubo.view * pc.modelMatrix * vec4(inPosition, 1.0);
+    gl_Position = snap(ubo.proj * ubo.view * pc.modelMatrix * vec4(inPosition, 1.0), vec2(256.0, 224.0));
     fragColor = inColor;
     fragTexCoord = inTexCoord;
     texIndex = inTexIndex;

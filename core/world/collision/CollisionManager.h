@@ -71,11 +71,8 @@ void collideWorldActors(
             
             if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResultA, collisionResultB))
             {
-                glm::vec3 nudgeA = glm::length(collisionResultA.impactVelocity) * collisionResultA.collisionNormal;
-                glm::vec3 nudgeB = glm::length(collisionResultB.impactVelocity) * collisionResultB.collisionNormal;
-                
-                actorA.addActorLocation(nudgeA);
-                actorB.addActorLocation(nudgeB);
+                actorA.addActorLocation(glm::length(collisionResultA.impactVelocity) * collisionResultA.collisionNormal);
+                actorB.addActorLocation(glm::length(collisionResultB.impactVelocity) * collisionResultB.collisionNormal);
             }
         }
     }
@@ -99,6 +96,7 @@ bool doesPlayerCollideWithActors(
 
         if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionResult.collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS)) {
             collisionResult.collisionPoint = playerLocation;
+            collisionResult.impactVelocity = actor.getActorVelocity();
             collisionResult.collisionSurface = actor.getCollisionSurface();
             return true;
         }
@@ -157,10 +155,10 @@ void movePlayerWithCollision(
         else
         {
             // if the player still collides, slightly adjust the movement to nudge them away from the edge
-            glm::vec3 smallNudge = PLAYER_PUSH_OUT_OF_OBJECT_FORCE * collisionNormal;
+            glm::vec3 smallNudge = glm::length(collisionResult.impactVelocity) * collisionNormal;
             glm::vec3 nudgeVelocity = slideVelocity + smallNudge;
 
-            player->movePlayer(player->predictNextPlayerLocation(smallNudge, deltaTime));
+            player->movePlayer(player->predictNextPlayerLocation(nudgeVelocity, deltaTime));
         }
     }
 }
