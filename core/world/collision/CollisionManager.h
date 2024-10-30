@@ -62,10 +62,12 @@ void collideWorldActors(
     const float deltaTime
 )
 {
-    for (Actor& actorA : worldActors)
+    for (size_t i = 0; i < worldActors.size(); ++i)
     {
-        for (Actor& actorB : worldActors)
+        for (size_t j = i + 1; j < worldActors.size(); ++j)
         {
+            Actor& actorA = worldActors[i];
+            Actor& actorB = worldActors[j];
             CollisionResult collisionResultA;
             CollisionResult collisionResultB;
             
@@ -154,11 +156,7 @@ void movePlayerWithCollision(
         }
         else
         {
-            // if the player still collides, slightly adjust the movement to nudge them away from the edge
-            glm::vec3 smallNudge = glm::length(collisionResult.impactVelocity) * collisionNormal;
-            glm::vec3 nudgeVelocity = slideVelocity + smallNudge;
-
-            player->movePlayer(player->predictNextPlayerLocation(nudgeVelocity, deltaTime));
+            player->movePlayer(player->predictNextPlayerLocation(PLAYER_PUSH_OUT_OF_OBJECT_FORCE * glm::length(collisionResult.impactVelocity) * collisionNormal, deltaTime));
         }
     }
 }
