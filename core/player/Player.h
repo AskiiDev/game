@@ -72,7 +72,7 @@ public:
     
     void movePlayer(const glm::vec3& newLocation);
     
-    glm::vec3 predictNextPlayerLocation(const glm::vec3& deltaLocation, const float deltaTime);
+    glm::vec3 predictNextPlayerLocation(const glm::vec3& deltaLocation, const double deltaTime);
     
     
     // testing

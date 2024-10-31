@@ -24,7 +24,8 @@ void VertexBuffer::populateBuffers()
     uint32_t vertexOffset = 0;
     uint32_t indexOffset = 0;
 
-    for (Actor& a : world->getWorldActors()) {
+    for (const Actor& a : world->getWorldActors())
+    {
         Object obj = a.getObject();
 
         vertexOffsets.push_back(vertexOffset);
@@ -33,7 +34,6 @@ void VertexBuffer::populateBuffers()
         vertices.insert(vertices.end(), obj.vertices.begin(), obj.vertices.end());
         indices.insert(indices.end(), obj.indices.begin(), obj.indices.end());
 
-        // Update offsets for the next object
         vertexOffset += static_cast<uint32_t>(obj.vertices.size());
         indexOffset += static_cast<uint32_t>(obj.indices.size());
     }

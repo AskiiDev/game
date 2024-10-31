@@ -352,7 +352,7 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
+    
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
     
 
@@ -373,27 +373,20 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     
     
-    
-    
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
     
-    PushConstants push;
-    vkCmdPushConstants(
-            commandBuffer,
-            pipelineLayout,
-            VK_SHADER_STAGE_VERTEX_BIT,
-            0,
-            sizeof(push),
-            &push
-        );
-    
-    for (size_t i = 0; i < world->getWorldActors().size(); i++)
+    const auto& actors = world->getWorldActors();
+
+    for (size_t i = 0; i < actors.size(); i++)
     {
-        Actor a = world->getWorldActors()[i];
+        const Actor& a = actors[i];
         
         if (a.getCulled())
+        {
             continue;
+        }
         
+        PushConstants push;
         push.modelMatrix = a.getModelMatrix();
         
         vkCmdPushConstants(

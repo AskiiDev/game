@@ -48,28 +48,24 @@ void Window::init(void* pointer, World* w)
 
 void Window::update()
 {
-    float dt = std::chrono::duration<float>(deltaTime).count();
-    glfwPollEvents();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    deltaTime = std::chrono::duration<double>(currentTime - previousTime).count();
+    previousTime = currentTime;
+
+  
+    std::cout << 1 / deltaTime << std::endl;
     
+    world->update(deltaTime);
+    glfwPollEvents();
+
     if (!isFocused)
     {
         player->mvDirection = 0;
     }
-    
-    world->update(dt);
-    updateCursorDelta();
-    
-//    if (deltaTime < FRAME_DURATION)
-//    {
-//        auto sleepTime = FRAME_DURATION - deltaTime;
-//        std::this_thread::sleep_for(sleepTime);
-//    }
-    
-    deltaTime = std::chrono::high_resolution_clock::now() - previousTime;
-//    printf("FPS: %f\n", 1.f / dt);
 
-    previousTime = std::chrono::high_resolution_clock::now();
+    updateCursorDelta();
 }
+
 
 
 void Window::destroy()

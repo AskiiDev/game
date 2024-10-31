@@ -59,7 +59,7 @@ bool doesActorCollideWithActor(
 void collideWorldActors(
     const glm::vec3& playerLocation,
     std::vector<Actor>& worldActors,
-    const float deltaTime
+    const double deltaTime
 )
 {
     for (size_t i = 0; i < worldActors.size(); ++i)
@@ -121,7 +121,7 @@ bool doesPlayerCollideWithActors(
 void movePlayerWithCollision(
     Player* player,
     std::vector<Actor>& worldActors,
-    const float deltaTime
+    const double deltaTime
 )
 {
     glm::vec3 playerVelocity = player->getPlayerVelocity();

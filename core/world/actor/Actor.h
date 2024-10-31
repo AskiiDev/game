@@ -31,7 +31,7 @@ public:
     Actor(const Object o, const Transform t);
     Actor(const Object o, const Transform t, const CollisionProfile cp);
     
-    void update(const float deltaTime);
+    void update(const double deltaTime);
     
 
     // Getters

@@ -101,9 +101,9 @@ glm::vec3 Player::addPlayerVelocity(const glm::vec3& velocity)
 }
 
 
-glm::vec3 Player::predictNextPlayerLocation(const glm::vec3& deltaLocation, const float deltaTime)
+glm::vec3 Player::predictNextPlayerLocation(const glm::vec3& deltaLocation, const double deltaTime)
 {
-    return camera.worldLocation + (deltaLocation * deltaTime);
+    return camera.worldLocation + (deltaLocation * (float) deltaTime);
 }
 
 

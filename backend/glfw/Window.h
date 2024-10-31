@@ -23,7 +23,7 @@ extern std::chrono::high_resolution_clock::time_point previousTime;
 
 class Window {
 private:
-    std::chrono::duration<double> deltaTime;
+    float deltaTime;
     
     double deltaX = 0.0, deltaY = 0.0;
     double prevX = 0.0, prevY = 0.0;

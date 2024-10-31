@@ -15,7 +15,7 @@ Actor::Actor(const Object o, const Transform t, const CollisionProfile cp) : Act
 }
 
 
-void Actor::update(const float dt)
+void Actor::update(const double dt)
 {
     deltaTime = dt;
 }
