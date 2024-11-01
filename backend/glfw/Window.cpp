@@ -50,6 +50,10 @@ void Window::update()
 {
     auto currentTime = std::chrono::high_resolution_clock::now();
     deltaTime = std::chrono::duration<double>(currentTime - previousTime).count();
+    if (deltaTime > MAX_DELTA_TIME) {
+        deltaTime = MAX_DELTA_TIME;
+    }
+    
     previousTime = currentTime;
 
   

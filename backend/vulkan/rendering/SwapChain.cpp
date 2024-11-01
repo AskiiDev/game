@@ -94,6 +94,8 @@ VkPresentModeKHR SwapChain::chooseSwapPresentMode(const std::vector<VkPresentMod
         }
     }
 
+    // VK_PRESENT_MODE_FIFO_KHR for V-Sync
+    // VK_PRESENT_MODE_IMMEDIATE_KHR for uncapped
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 

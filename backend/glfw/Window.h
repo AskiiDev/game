@@ -17,6 +17,7 @@ struct Resolution
 
 
 const int TARGET_FPS = 60;
+const double MAX_DELTA_TIME = 0.0333;
 const std::chrono::duration<double> FRAME_DURATION(1.0 / TARGET_FPS);
 extern std::chrono::high_resolution_clock::time_point previousTime;
 

@@ -354,9 +354,6 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-    
-
-//    push.resolution = glm::vec2(swapChain->window->desiredResolution.width, swapChain->window->desiredResolution.height);
 
     VkViewport viewport{};
     viewport.x = 0.0f;
@@ -375,6 +372,8 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
     
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
     
+    
+    PushConstants push;
     const auto& actors = world->getWorldActors();
 
     for (size_t i = 0; i < actors.size(); i++)
@@ -386,7 +385,6 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
             continue;
         }
         
-        PushConstants push;
         push.modelMatrix = a.getModelMatrix();
         
         vkCmdPushConstants(
