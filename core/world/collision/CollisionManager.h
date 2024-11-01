@@ -156,7 +156,14 @@ void movePlayerWithCollision(
         }
         else
         {
-            player->movePlayer(player->predictNextPlayerLocation(PLAYER_PUSH_OUT_OF_OBJECT_FORCE * glm::length(collisionResult.impactVelocity) * collisionNormal, deltaTime));
+            if (glm::length(collisionResult.impactVelocity) != 0)
+            {
+                player->movePlayer(player->predictNextPlayerLocation(PLAYER_PUSH_OUT_OF_OBJECT_FORCE * glm::length(collisionResult.impactVelocity) * collisionNormal, deltaTime));
+            }
+            else
+            {
+                player->movePlayer(player->predictNextPlayerLocation(PLAYER_PUSH_OUT_OF_OBJECT_FORCE * collisionNormal, deltaTime));
+            }
         }
     }
 }

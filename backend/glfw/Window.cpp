@@ -50,16 +50,18 @@ void Window::update()
 {
     auto currentTime = std::chrono::high_resolution_clock::now();
     deltaTime = std::chrono::duration<double>(currentTime - previousTime).count();
-    if (deltaTime > MAX_DELTA_TIME) {
-        deltaTime = MAX_DELTA_TIME;
+    
+    double accumulatedTime = deltaTime;
+
+    while (accumulatedTime > TARGET_DELTA_TIME) {
+        world->update(TARGET_DELTA_TIME);
+        accumulatedTime -= TARGET_DELTA_TIME;
     }
     
     previousTime = currentTime;
 
   
     std::cout << 1 / deltaTime << std::endl;
-    
-    world->update(deltaTime);
     glfwPollEvents();
 
     if (!isFocused)

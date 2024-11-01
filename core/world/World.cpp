@@ -49,7 +49,7 @@ void World::update(const double deltaTime)
     }
     
     worldActors[0].addActorLocation(glm::vec3(0, 0, -0.5));
-    worldActors[1].addActorLocation(glm::vec3(0, 0, 0.5));
+//    worldActors[1].addActorLocation(glm::vec3(0, 0, 0.5));
     
     
     collideWorldActors(player.getPlayerLocation(), worldActors, deltaTime);
