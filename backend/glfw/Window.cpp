@@ -61,7 +61,7 @@ void Window::update()
     previousTime = currentTime;
 
   
-    std::cout << 1 / deltaTime << std::endl;
+//    std::cout << 1 / deltaTime << std::endl;
     glfwPollEvents();
 
     if (!isFocused)

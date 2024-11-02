@@ -17,13 +17,16 @@ void World::load()
     Object o;
     
     t = { glm::vec3(0.f, 0.f, 5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    o = loadObject("res/models/chateau.obj", 0);
+    o = loadObject("res/models/car.obj", 0);
     Actor a(o, t);
     
-    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    t = { glm::vec3(0.5f, 0.f, -4.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
     o = loadObject("res/models/car.obj", 1);
     Actor d(o, t);
-//    
+    
+    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.7f, 1.4f) };
+    Actor f(o, t);
+//
 //    t = { glm::vec3(1.2f, 1.5f, 1.1f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f) };
 //    o = loadObject("res/models/sword/sword.obj", 1);
 ////    o = loadObject("res/models/chateau.obj", 0);
@@ -35,6 +38,7 @@ void World::load()
     
     worldActors.push_back(a);
     worldActors.push_back(d);
+    worldActors.push_back(f);
 }
 
 void World::update(const double deltaTime)
@@ -49,7 +53,7 @@ void World::update(const double deltaTime)
     }
     
     worldActors[0].addActorLocation(glm::vec3(0, 0, -0.5));
-//    worldActors[1].addActorLocation(glm::vec3(0, 0, 0.5));
+//    worldActors[2].addActorLocation(glm::vec3(0, 0, 0.5));
     
     
     collideWorldActors(player.getPlayerLocation(), worldActors, deltaTime);

@@ -44,23 +44,40 @@ void calculateBoundingBoxCollisionNormal(
     const glm::vec3 worldLocation,
     const glm::vec3 min,
     const glm::vec3 max,
-    glm::vec3& collisionNormal
+    glm::vec3& collisionNormal,
+    float& penetrationDepth
 )
 {
     glm::vec3 deltaMin = worldLocation - min;
     glm::vec3 deltaMax = max - worldLocation;
-
+    
     float nearestX = (deltaMin.x < deltaMax.x) ? deltaMin.x : deltaMax.x;
     float nearestY = (deltaMin.y < deltaMax.y) ? deltaMin.y : deltaMax.y;
     float nearestZ = (deltaMin.z < deltaMax.z) ? deltaMin.z : deltaMax.z;
-
+    
     // Choose the axis with the smallest distance to decide the normal
     if (nearestX < nearestY && nearestX < nearestZ)
+    {
         collisionNormal = glm::vec3((deltaMin.x < deltaMax.x) ? -1.0f : 1.0f, 0.0f, 0.0f);
+        penetrationDepth = nearestX;
+    }
+    
     else if (nearestY < nearestX && nearestY < nearestZ)
+    {
         collisionNormal = glm::vec3(0.0f, (deltaMin.y < deltaMax.y) ? -1.0f : 1.0f, 0.0f);
+        penetrationDepth = nearestY;
+    }
+    
     else
+    {
         collisionNormal = glm::vec3(0.0f, 0.0f, (deltaMin.z < deltaMax.z) ? -1.0f : 1.0f);
+        penetrationDepth = nearestZ;
+    }
+    
+    if (penetrationDepth < 0.001)
+    {
+        penetrationDepth = 0;
+    }
 }
 
 bool isBoxInBoundingBox(
@@ -68,7 +85,10 @@ bool isBoxInBoundingBox(
     const glm::vec3& amax,
     const glm::vec3& bmin,
     const glm::vec3& bmax,
-    glm::vec3& collisionNormal
+    glm::vec3& collisionNormalA,
+    float& penetrationDepthA,
+    glm::vec3& collisionNormalB,
+    float& penetrationDepthB
 )
 {
     if (amax.x < bmin.x || amin.x > bmax.x)
@@ -80,7 +100,18 @@ bool isBoxInBoundingBox(
    if (amax.z < bmin.z || amin.z > bmax.z)
        return false;
     
-    calculateBoundingBoxCollisionNormal((amin + amax) * 0.5f, bmin, bmax, collisionNormal);
+    glm::vec3 closestPointA;
+    closestPointA.x = std::max(amin.x, std::min(bmin.x, amax.x));
+    closestPointA.y = std::max(amin.y, std::min(bmin.y, amax.y));
+    closestPointA.z = std::max(amin.z, std::min(bmin.z, amax.z));
+    
+    glm::vec3 closestPointB;
+    closestPointB.x = std::max(bmin.x, std::min(amin.x, bmax.x));
+    closestPointB.y = std::max(bmin.y, std::min(amin.y, bmax.y));
+    closestPointB.z = std::max(bmin.z, std::min(amin.z, bmax.z));
+    
+    calculateBoundingBoxCollisionNormal(closestPointA, bmin, bmax, collisionNormalA, penetrationDepthA);
+    calculateBoundingBoxCollisionNormal(closestPointB, amin, amax, collisionNormalB, penetrationDepthB);
     
     return true;
 }
@@ -104,6 +135,7 @@ bool isSphereInBoundingBox(
     const glm::vec3& min,
     const glm::vec3& max,
     glm::vec3& collisionNormal,
+    float& penetrationDepth,
     const float radius
 )
 {
@@ -111,7 +143,15 @@ bool isSphereInBoundingBox(
         sphereOrigin.y >= min.y - radius && sphereOrigin.y <= max.y + radius &&
         sphereOrigin.z >= min.z - radius && sphereOrigin.z <= max.z + radius)
     {
-        calculateBoundingBoxCollisionNormal(sphereOrigin, min, max, collisionNormal);
+        glm::vec3 closestPoint = glm::clamp(sphereOrigin, min, max);
+        glm::vec3 direction = closestPoint - sphereOrigin;
+        
+        if (glm::length(direction) > 0.f)
+        {
+            direction = glm::normalize(direction);
+        }
+        
+        calculateBoundingBoxCollisionNormal((sphereOrigin + direction * radius), min, max, collisionNormal, penetrationDepth);
         
         return true;
     }
@@ -125,6 +165,7 @@ bool isCapsuleInBoundingBox(
     const glm::vec3& min,
     const glm::vec3& max,
     glm::vec3& collisionNormal,
+    float& penetrationDepth,
     const float halfHeight,
     const float radius
 )
@@ -136,7 +177,7 @@ bool isCapsuleInBoundingBox(
     
     if (distance * distance <= halfHeight * halfHeight)
     {
-        if (isSphereInBoundingBox(axisPoint, min, max, collisionNormal, radius))
+        if (isSphereInBoundingBox(axisPoint, min, max, collisionNormal, penetrationDepth, radius))
             return true;
     }
     

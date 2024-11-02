@@ -13,7 +13,7 @@ Player::Player()
 
 void Player::init()
 {
-    camera.worldLocation = glm::vec3(0.f, 0.f, -5.f);
+    camera.worldLocation = glm::vec3(0.f, 2.3f, -0.f);
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
@@ -110,6 +110,8 @@ glm::vec3 Player::predictNextPlayerLocation(const glm::vec3& deltaLocation, cons
 void Player::movePlayer(const glm::vec3& newLocation)
 {
     camera.worldLocation = newLocation;
+    
+//    printf("x: %f, y: %f, z: %f\n", camera.worldLocation.x, camera.worldLocation.y, camera.worldLocation.z);
 }
 
 

@@ -60,6 +60,7 @@ struct CollisionResult
     glm::vec3 collisionPoint;
     glm::vec3 collisionNormal;
     glm::vec3 impactVelocity;
+    float penetrationDepth;
     
     CollisionSurface collisionSurface;
 };

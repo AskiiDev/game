@@ -37,9 +37,8 @@ bool doesActorCollideWithActor(
     BoundingBox aBox = actorA.getBoundingBox();
     BoundingBox bBox = actorB.getBoundingBox();
     
-    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResultA.collisionNormal))
+    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResultA.collisionNormal, collisionResultA.penetrationDepth, collisionResultB.collisionNormal, collisionResultB.penetrationDepth))
     {
-        calculateBoundingBoxCollisionNormal(actorB.getWorldLocation(), aBox.min, aBox.max, collisionResultB.collisionNormal);
         
         collisionResultA.collisionSurface = actorB.getCollisionSurface();
         collisionResultA.collisionPoint = actorA.getWorldLocation();
@@ -73,8 +72,9 @@ void collideWorldActors(
             
             if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResultA, collisionResultB))
             {
-                actorA.addActorLocation(glm::length(collisionResultA.impactVelocity) * collisionResultA.collisionNormal);
-                actorB.addActorLocation(glm::length(collisionResultB.impactVelocity) * collisionResultB.collisionNormal);
+                actorA.addActorLocation((glm::length(collisionResultA.impactVelocity) + collisionResultA.penetrationDepth) * collisionResultA.collisionNormal);
+                
+                actorB.addActorLocation((glm::length(collisionResultB.impactVelocity) + collisionResultB.penetrationDepth) * collisionResultB.collisionNormal);
             }
         }
     }
@@ -87,24 +87,52 @@ bool doesPlayerCollideWithActors(
     CollisionResult& collisionResult
 )
 {
+    glm::vec3 accumulatedNormals(0, 0, 0);
+    glm::vec3 normal(0, 0, 0);
+    
+    bool collision = false;
+    
     for (Actor& actor : worldActors)
     {
-        if (!inDistanceForCollisionCheck(playerLocation, actor) ||
-            !collisionProfileEnabled(actor, CW_PLAYER)) {
+        if (!collisionProfileEnabled(actor, CW_PLAYER))
+        {
+            continue;
+        }
+        
+        if (!inDistanceForCollisionCheck(playerLocation, actor))
+        {
             continue;
         }
         
         BoundingBox box = actor.getBoundingBox();
 
-        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, collisionResult.collisionNormal, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS)) {
+        if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, normal, collisionResult.penetrationDepth, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
+        {
             collisionResult.collisionPoint = playerLocation;
             collisionResult.impactVelocity = actor.getActorVelocity();
             collisionResult.collisionSurface = actor.getCollisionSurface();
-            return true;
+            collisionResult.collisionNormal = normal;
+            
+            accumulatedNormals += normal;
+
+            collision = true;
         }
     }
     
-    return false;
+    if (collision)
+    {
+        if (glm::length(accumulatedNormals) > 0.f)
+        {
+            collisionResult.collisionNormal = glm::normalize(accumulatedNormals);
+        }
+        else
+        {
+            // TODO: ceiling check
+            collisionResult.collisionNormal = glm::vec3(0, 1, 0);
+        }
+    }
+    
+    return collision;
 }
 
 /**
@@ -156,14 +184,21 @@ void movePlayerWithCollision(
         }
         else
         {
-            if (glm::length(collisionResult.impactVelocity) != 0)
+            collisionNormal = collisionResult.collisionNormal;
+            
+            float impactVelocity = glm::length(collisionResult.impactVelocity);
+            if (impactVelocity == 0)
             {
-                player->movePlayer(player->predictNextPlayerLocation(PLAYER_PUSH_OUT_OF_OBJECT_FORCE * glm::length(collisionResult.impactVelocity) * collisionNormal, deltaTime));
+                impactVelocity = 1;
             }
-            else
-            {
-                player->movePlayer(player->predictNextPlayerLocation(PLAYER_PUSH_OUT_OF_OBJECT_FORCE * collisionNormal, deltaTime));
-            }
+            
+            player->movePlayer(
+                    player->predictNextPlayerLocation(//slideVelocity +
+                            (impactVelocity + collisionResult.penetrationDepth) *
+                            collisionNormal,
+                    deltaTime
+                )
+            );
         }
     }
 }
