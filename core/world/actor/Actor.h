@@ -8,7 +8,9 @@
 class Actor {
 private:
     BoundingBox cachedBoundingBox;
+    
     bool hasUpdatedSinceLastDraw = true;
+    bool physicsEnabled = false;
     
 protected:
     Object obj;
@@ -49,14 +51,16 @@ public:
     
     Object getObject() const;
     
-    BoundingBox getBoundingBox();
+    BoundingBox getBoundingBox() const;
     BoundingBox calculateBoundingBox() const;
     
-    std::vector<glm::vec3> getBoundingBoxCorners();
-    float getApproximateBoundingRadius();
+    std::vector<glm::vec3> getBoundingBoxCorners() const;
+    float getApproximateBoundingRadius() const;
     
     CollisionProfile getCollisionProfile() const { return collisionProfile; }
     CollisionSurface getCollisionSurface() const { return collisionSurface; }
+    
+    bool getPhysicsEnabled() const { return physicsEnabled; }
     
     bool getCulled() const { return isCulled; }
     bool getActive() const { return isActive; }
@@ -78,6 +82,8 @@ public:
     
     void setCollisionProfile(const CollisionProfile& cp);
     void setCollisionSurface(const CollisionSurface& cs);
+    
+    void setPhysicsEnabled(const bool enabled);
 };
 
 #endif

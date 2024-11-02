@@ -89,7 +89,7 @@ glm::vec3 Player::getPlayerVelocity()
     }
     
     
-    playerVelocity *= 0.5;
+    playerVelocity *= 0.8;
     
     return addPlayerVelocity(desiredMovement * playerSpeed);
 }

@@ -47,6 +47,13 @@ struct CollisionSurface
     SurfaceType surfaceType = SurfaceType::DEFAULT;
 };
 
+
+struct BasicCollisionResponse
+{
+    glm::vec3 collisionNormal;
+    float penetrationDepth;
+};
+
 /**
  * @struct CollisionResult
  * @brief Struct representing the result of a collision between entities.
@@ -55,15 +62,17 @@ struct CollisionSurface
  * point of collision, the normal vector at the collision point, the velocity
  * at impact, and the properties of the surface where the collision occurred.
  */
-struct CollisionResult
+struct DetailedCollisionResponse
 {
     glm::vec3 collisionPoint;
-    glm::vec3 collisionNormal;
     glm::vec3 impactVelocity;
-    float penetrationDepth;
-    
     CollisionSurface collisionSurface;
+    BasicCollisionResponse penetrationInfo;
 };
+
+
+
+
 
 
 #endif

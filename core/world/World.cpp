@@ -16,29 +16,22 @@ void World::load()
     Transform t;
     Object o;
     
-    t = { glm::vec3(0.f, 0.f, 5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    t = { glm::vec3(0.f, 0.0f, 5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
     o = loadObject("res/models/car.obj", 0);
     Actor a(o, t);
     
-    t = { glm::vec3(0.5f, 0.f, -4.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
+    t = { glm::vec3(0.5f, 0.f, -6.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
     o = loadObject("res/models/car.obj", 1);
-    Actor d(o, t);
+    Actor b(o, t);
     
     t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 0.7f, 1.4f) };
-    Actor f(o, t);
-//
-//    t = { glm::vec3(1.2f, 1.5f, 1.1f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.5f) };
-//    o = loadObject("res/models/sword/sword.obj", 1);
-////    o = loadObject("res/models/chateau.obj", 0);
-//    Actor b(o, t);
-//    
-//    t = { glm::vec3(1.8f, 1.1f, 1.1f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.2f) };
-//    Actor c(o, t);
+    Actor c(o, t);
     
+    a.setPhysicsEnabled(true);
     
     worldActors.push_back(a);
-    worldActors.push_back(d);
-    worldActors.push_back(f);
+    worldActors.push_back(b);
+    worldActors.push_back(c);
 }
 
 void World::update(const double deltaTime)
@@ -52,7 +45,9 @@ void World::update(const double deltaTime)
         }
     }
     
-    worldActors[0].addActorLocation(glm::vec3(0, 0, -0.5));
+    worldActors[0].setActorVelocity(glm::vec3(0, 0, -1));
+    worldActors[0].addActorLocation(glm::vec3(0, 0, -1));
+//    worldActors[0].setActorVelocity(glm::vec3(0, 0, 1));
 //    worldActors[2].addActorLocation(glm::vec3(0, 0, 0.5));
     
     
@@ -66,6 +61,7 @@ void World::update(const double deltaTime)
     
 //    worldActors[0].addActorRotation(glm::vec3(45, 45, 45));
 //    worldActors[1].addActorRotation(glm::vec3(-110, -110, -110));
+//    worldActors[2].addActorRotation(glm::vec3(-50, -90, -20));
 
     
 //    worldActors[0].setActorScale(glm::vec3(0.5f + sin(glfwGetTime() * 2.f) * sin(glfwGetTime() * 2.f),

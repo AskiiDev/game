@@ -13,7 +13,7 @@ void TextureBuffer::init(DeviceManager* d, VkCommandPool cp)
     commandPool = cp;
     
 //    createTextureImage("res/models/sword/face.jpg");
-    createTextureImage("res/models/chateau.jpg");
+    createTextureImage("res/models/cat.png");
     createTextureImage("res/models/car.jpg");
     
 //    createTextureImage("res/models/sword/sword.jpg");

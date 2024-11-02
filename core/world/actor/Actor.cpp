@@ -18,6 +18,18 @@ Actor::Actor(const Object o, const Transform t, const CollisionProfile cp) : Act
 void Actor::update(const double dt)
 {
     deltaTime = dt;
+    
+    if (hasUpdatedSinceLastDraw)
+    {
+        cachedBoundingBox = calculateBoundingBox();
+        hasUpdatedSinceLastDraw = false;
+    }
+    
+    if (physicsEnabled)
+    {
+//        addActorLocation(actorVelocity);
+//        actorVelocity *= 0.98f;
+    }
 }
 
 
@@ -106,7 +118,6 @@ void Actor::setActorScale(const glm::vec3& scale)
 void Actor::addActorLocation(const glm::vec3& addLocation)
 {
     setActorLocation(worldTransform.worldLocation + addLocation * deltaTime);
-    setActorVelocity(addLocation);
 }
 
 void Actor::addActorRotation(const glm::vec3& addRotation)
@@ -144,15 +155,13 @@ void Actor::setCollisionSurface(const CollisionSurface& cs)
     collisionSurface = cs;
 }
 
-
-BoundingBox Actor::getBoundingBox()
+void Actor::setPhysicsEnabled(const bool enabled)
 {
-    if (hasUpdatedSinceLastDraw)
-    {
-        cachedBoundingBox = calculateBoundingBox();
-        hasUpdatedSinceLastDraw = false;
-    }
-    
+    physicsEnabled = enabled;
+}
+
+BoundingBox Actor::getBoundingBox() const
+{
     return cachedBoundingBox;
 }
 
@@ -199,7 +208,7 @@ BoundingBox Actor::calculateBoundingBox() const
 }
 
 
-std::vector<glm::vec3> Actor::getBoundingBoxCorners()
+std::vector<glm::vec3> Actor::getBoundingBoxCorners() const
 {
     BoundingBox box = getBoundingBox();
     
@@ -219,7 +228,7 @@ std::vector<glm::vec3> Actor::getBoundingBoxCorners()
 }
 
 
-float Actor::getApproximateBoundingRadius()
+float Actor::getApproximateBoundingRadius() const
 {
     BoundingBox box = getBoundingBox();
     
