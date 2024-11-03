@@ -55,6 +55,7 @@ void Player::setProjectionMatrix(const glm::mat4& proj)
 
 glm::vec3 Player::getPlayerVelocity()
 {
+//    playerVelocity *= 0.9;
     glm::vec3 mask = glm::vec3(1, 1, 1);
     
     glm::vec3 forwardDelta = camera.forwardVector * mask;
@@ -88,16 +89,21 @@ glm::vec3 Player::getPlayerVelocity()
         desiredMovement = glm::normalize(desiredMovement);
     }
     
+    setPlayerVelocity(desiredMovement * playerSpeed);
+    return playerVelocity;
     
-    playerVelocity *= 0.8;
-    
-    return addPlayerVelocity(desiredMovement * playerSpeed);
 }
 
 
 glm::vec3 Player::addPlayerVelocity(const glm::vec3& velocity)
 {
     return (playerVelocity += velocity);
+}
+
+
+void Player::setPlayerVelocity(const glm::vec3& velocity)
+{
+    playerVelocity = velocity;
 }
 
 

@@ -52,6 +52,11 @@ struct BasicCollisionResponse
 {
     glm::vec3 collisionNormal;
     float penetrationDepth;
+    
+    glm::vec3 getPenetrationNormal() const
+    {
+        return collisionNormal * penetrationDepth;
+    }
 };
 
 /**

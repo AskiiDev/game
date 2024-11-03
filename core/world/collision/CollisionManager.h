@@ -135,8 +135,13 @@ bool doesPlayerCollideWithActors(
     DetailedCollisionResponse& collisionResult
 )
 {
+    bool collisionOccured = false;
+    
     BoundingBox box;
     BasicCollisionResponse penetrationInfo;
+    
+    glm::vec3 accumulatedNormals(0, 0, 0);
+    glm::vec3 accumulatedPenetrationNormals(0, 0, 0);
     
     for (const Actor& actor : worldActors)
     {
@@ -152,7 +157,6 @@ bool doesPlayerCollideWithActors(
         
         box = actor.getBoundingBox();
         
-        
         if (isCapsuleInBoundingBox(playerLocation, glm::vec3(0, 1, 0), box.min, box.max, penetrationInfo, PLAYER_COLLISION_HALF_HEIGHT, PLAYER_COLLISION_RADIUS))
         {
             collisionResult.collisionPoint = playerLocation;
@@ -160,11 +164,28 @@ bool doesPlayerCollideWithActors(
             collisionResult.collisionSurface = actor.getCollisionSurface();
             collisionResult.penetrationInfo = penetrationInfo;
             
-            return true;
+            accumulatedNormals += penetrationInfo.collisionNormal;
+            accumulatedPenetrationNormals += penetrationInfo.getPenetrationNormal();
+            
+            collisionOccured = true;
         }
     }
     
-    return false;
+    if (collisionOccured)
+    {
+        if (glm::length(accumulatedNormals) > 0.f && glm::length(accumulatedPenetrationNormals) > 0.f)
+        {
+            collisionResult.penetrationInfo.collisionNormal = glm::normalize(accumulatedPenetrationNormals);
+        }
+        
+        else
+        {
+            collisionResult.penetrationInfo.collisionNormal = glm::vec3(0, 1, 0);
+        }
+    }
+    
+    
+    return collisionOccured;
 }
 
 
@@ -185,7 +206,7 @@ void movePlayerWithCollision(
     const double deltaTime
 )
 {
-    if (!player) return;
+//    if (!player) return;
     
     glm::vec3 playerVelocity = player->getPlayerVelocity();
     glm::vec3 nextLocation = player->predictNextPlayerLocation(playerVelocity, deltaTime);

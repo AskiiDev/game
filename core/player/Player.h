@@ -45,7 +45,7 @@ private:
     glm::vec3 playerVelocity = glm::vec3(0, 0, 0);
     float acceleration = 5.0f;
     float deceleration = 15.0f;
-    float playerSpeed = 0.4f;
+    float playerSpeed = 1.6f;
     
     double cameraPitchMin = -87.;
     double cameraPitchMax = 80.;
@@ -69,6 +69,7 @@ public:
     glm::vec3 getPlayerLocation() const;
     
     glm::vec3 addPlayerVelocity(const glm::vec3& velocity);
+    void setPlayerVelocity(const glm::vec3& velocity);
     
     void movePlayer(const glm::vec3& newLocation);
     
