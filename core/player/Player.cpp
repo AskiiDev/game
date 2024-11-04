@@ -13,7 +13,7 @@ Player::Player()
 
 void Player::init()
 {
-    camera.worldLocation = glm::vec3(0.f, 2.3f, -0.f);
+    camera.worldLocation = glm::vec3(0.f, 2.3f, -5.f);
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
@@ -55,7 +55,7 @@ void Player::setProjectionMatrix(const glm::mat4& proj)
 
 glm::vec3 Player::getPlayerVelocity()
 {
-//    playerVelocity *= 0.9;
+//    playerVelocity *= 0.8;
     glm::vec3 mask = glm::vec3(1, 1, 1);
     
     glm::vec3 forwardDelta = camera.forwardVector * mask;
@@ -90,6 +90,7 @@ glm::vec3 Player::getPlayerVelocity()
     }
     
     setPlayerVelocity(desiredMovement * playerSpeed);
+//    return addPlayerVelocity(desiredMovement * playerSpeed);
     return playerVelocity;
     
 }

@@ -1,6 +1,7 @@
 #ifndef COLLISIONMANAGER_H
 #define COLLISIONMANAGER_H
 
+#include "Log.h"
 #include "Actor.h"
 #include "Player.h"
 #include "CollisionUtils.h"
@@ -162,7 +163,11 @@ bool doesPlayerCollideWithActors(
             collisionResult.collisionPoint = playerLocation;
             collisionResult.impactVelocity = actor.getActorVelocity();
             collisionResult.collisionSurface = actor.getCollisionSurface();
-            collisionResult.penetrationInfo = penetrationInfo;
+            
+            if (penetrationInfo.penetrationDepth > collisionResult.penetrationInfo.penetrationDepth)
+            {
+                collisionResult.penetrationInfo.penetrationDepth = penetrationInfo.penetrationDepth;
+            }
             
             accumulatedNormals += penetrationInfo.collisionNormal;
             accumulatedPenetrationNormals += penetrationInfo.getPenetrationNormal();

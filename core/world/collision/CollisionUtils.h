@@ -61,7 +61,7 @@ void calculateBoundingBoxCollisionNormal(
         collisionResult.penetrationDepth = nearestZ;
     }
     
-    if (collisionResult.penetrationDepth < 0.001)
+    if (collisionResult.penetrationDepth < 0)
     {
         collisionResult.penetrationDepth = 0;
     }
@@ -76,45 +76,26 @@ bool isBoxInBoundingBox(
     BasicCollisionResponse& collisionResultB
 )
 {
-    if (amax.x < bmin.x || amin.x > bmax.x)
-       return false;
+    if (amax.x < bmin.x || amin.x > bmax.x) return false;
+    if (amax.y < bmin.y || amin.y > bmax.y) return false;
+    if (amax.z < bmin.z || amin.z > bmax.z) return false;
     
-   if (amax.y < bmin.y || amin.y > bmax.y)
-       return false;
     
-   if (amax.z < bmin.z || amin.z > bmax.z)
-       return false;
+    glm::vec3 closestPointA, closestPointB;
     
-    glm::vec3 closestPointA;
-    closestPointA.x = std::max(amin.x, std::min(bmin.x, amax.x));
-    closestPointA.y = std::max(amin.y, std::min(bmin.y, amax.y));
-    closestPointA.z = std::max(amin.z, std::min(bmin.z, amax.z));
+    glm::vec3 aCenter = (amin + amax) / 2.f;
+    glm::vec3 bCenter = (bmin + bmax) / 2.f;
     
-    glm::vec3 closestPointB;
-    closestPointB.x = std::max(bmin.x, std::min(amin.x, bmax.x));
-    closestPointB.y = std::max(bmin.y, std::min(amin.y, bmax.y));
-    closestPointB.z = std::max(bmin.z, std::min(amin.z, bmax.z));
-    
+    closestPointA = glm::clamp(bCenter, amin, amax) ;
+    closestPointB = glm::clamp(aCenter, bmin, bmax);
+
     calculateBoundingBoxCollisionNormal(closestPointA, bmin, bmax, collisionResultA);
     calculateBoundingBoxCollisionNormal(closestPointB, amin, amax, collisionResultB);
     
     return true;
 }
 
-/**
- * @brief Checks if a sphere is within a bounding box and calculates the collision normal if a collision occurs.
- *
- * This function checks if a sphere with a given radius intersects or is within a bounding box.
- * If the sphere is inside the bounding box, the function calculates the collision normal using the
- * `calculateCollisionNormal` function.
- *
- * @param sphereOrigin The world location of the center of the sphere.
- * @param min The minimum corner of the bounding box.
- * @param max The maximum corner of the bounding box.
- * @param[out] collisionNormal The calculated collision normal, which will be set if a collision is detected.
- * @param radius The radius of the sphere (default is 0.12).
- * @return True if the sphere is inside the bounding box, false otherwise.
- */
+
 bool isSphereInBoundingBox(
     const glm::vec3& sphereOrigin,
     const glm::vec3& min,

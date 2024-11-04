@@ -28,13 +28,13 @@ float bayerDither4x4(vec3 color, int x, int y)
 
 void main()
 {
-    float pixelationFactor = 128.0;
+    //float pixelationFactor = 128.0;
 //
 //    // Get the texture coordinates and adjust them to achieve the pixelation effect
-    vec2 pixelatedCoords = floor(fragTexCoord * pixelationFactor) / pixelationFactor;
+    //vec2 pixelatedCoords = floor(fragTexCoord * pixelationFactor) / pixelationFactor;
 
     // Sample the texture using the pixelated coordinates
-    vec3 col = texture(sampler2D(textures[texIndex], texSampler), pixelatedCoords).rgb;
+    vec3 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord).rgb;
 //    outColor = vec4(col, 1.0);
     
     float dither;
