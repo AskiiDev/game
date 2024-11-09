@@ -15,6 +15,8 @@ struct UniformBufferObject
 {
     glm::mat4 view;
     glm::mat4 proj;
+    glm::vec2 screenResolution;
+    float time;
 };
 
 struct PushConstants

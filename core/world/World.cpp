@@ -17,25 +17,39 @@ void World::load()
     Object o;
     
     t = { glm::vec3(0.f, 0.0f, 0.f), glm::vec3(0.f, 180.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    o = loadObject("res/models/car.obj", 1);
+    o = loadObject("res/models/shadow_cat.obj", 0);
     Actor a(o, t);
-    
-    t = { glm::vec3(0.5f, 0.f, -6.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    o = loadObject("res/models/car.obj", 1);
-    Actor b(o, t);
     
     t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
     Actor c(o, t);
     
+    t = { glm::vec3(-3.f, -0.3f, -4.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(7.f, 1.f, 7.f) };
+    o = loadObject("res/models/floor.obj", 2);
+    Actor floor(o, t);
+    
+    floor.setCollisionProfile(CW_PLAYER);
     a.setPhysicsEnabled(true);
+//    c.setPhysicsEnabled(true);
+    
+//    a.setActorVelocity(glm::vec3(0, 0, -15));
+//    b.setPhysicsEnabled(true);
     
     worldActors.push_back(a);
-    worldActors.push_back(b);
     worldActors.push_back(c);
+    
+    
+//    worldActors.push_back(b);
+    
+    worldActors.push_back(floor);
+    
+    
 }
 
 void World::update(const double deltaTime)
 {
+    worldActors[0].setActorVelocity(glm::vec3(0, 0, -1));
+    worldActors[0].addActorRotation(glm::vec3(0, 20, 0));
+    
     // update actors
     for (Actor& actor : worldActors)
     {
@@ -45,23 +59,13 @@ void World::update(const double deltaTime)
         }
     }
     
-    worldActors[0].setActorVelocity(glm::vec3(0, 0, -1));
-    worldActors[0].addActorLocation(glm::vec3(0, 0, -1));
-//    worldActors[0].setActorVelocity(glm::vec3(0, 0, 1));
-//    worldActors[2].addActorLocation(glm::vec3(0, 0, 0.5));
-    
-    
-    collideWorldActors(player.getPlayerLocation(), worldActors, deltaTime);
+    collideWorldActors(player.getPlayerLocation(), worldActors);
     
     movePlayerWithCollision(getPlayerAsRef(), worldActors, deltaTime);
     getPlayerAsRef()->updateCameraVectors();
     
     // actor culling
     frustumCullActors(player, worldActors);
-    
-    worldActors[0].addActorRotation(glm::vec3(0, 20, 0));
-//    worldActors[1].addActorRotation(glm::vec3(-110, -110, -110));
-//    worldActors[2].addActorRotation(glm::vec3(-50, -90, -20));
 
     
 //    worldActors[0].setActorScale(glm::vec3(0.5f + sin(glfwGetTime() * 2.f) * sin(glfwGetTime() * 2.f),

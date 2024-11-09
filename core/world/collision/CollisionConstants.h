@@ -7,6 +7,4 @@ const float PLAYER_CULL_COLLISION_DISTANCE = 15.f;
 const float PLAYER_COLLISION_RADIUS = 0.12f;
 const float PLAYER_COLLISION_HALF_HEIGHT = 0.12f;
 
-const float PLAYER_PUSH_OUT_OF_OBJECT_FORCE = 1.00f;
-
 #endif

@@ -19,19 +19,23 @@ void Actor::update(const double dt)
 {
     deltaTime = dt;
     
-    if (hasUpdatedSinceLastDraw)
-    {
-        cachedBoundingBox = calculateBoundingBox();
-        hasUpdatedSinceLastDraw = false;
-    }
-    
     if (physicsEnabled)
     {
-//        addActorLocation(actorVelocity);
-//        actorVelocity *= 0.98f;
+        addActorLocationContinuous(actorVelocity);
+        actorVelocity *= 0.98f;
+    }
+    
+    if (hasUpdatedSinceLastDraw)
+    {
+        cacheBoundingBox();
+        hasUpdatedSinceLastDraw = false;
     }
 }
 
+void Actor::cacheBoundingBox()
+{
+    cachedBoundingBox = calculateBoundingBox();
+}
 
 glm::vec3 Actor::getWorldLocation() const { return worldTransform.worldLocation; }
 glm::vec3 Actor::getWorldRotation() const { return worldTransform.worldRotation; }
@@ -115,9 +119,14 @@ void Actor::setActorScale(const glm::vec3& scale)
     worldTransform.worldScale = scale;
 }
 
-void Actor::addActorLocation(const glm::vec3& addLocation)
+void Actor::addActorLocationContinuous(const glm::vec3& addLocation)
 {
     setActorLocation(worldTransform.worldLocation + addLocation * deltaTime);
+}
+
+void Actor::addActorLocation(const glm::vec3& addLocation)
+{
+    setActorLocation(worldTransform.worldLocation + addLocation);
 }
 
 void Actor::addActorRotation(const glm::vec3& addRotation)
@@ -170,7 +179,6 @@ BoundingBox Actor::calculateBoundingBox() const
 {
     BoundingBox box = obj.boundingBox;
 
-    // Get the 8 corners of the original bounding box in object space
     glm::vec3 min = box.min;
     glm::vec3 max = box.max;
 
@@ -185,21 +193,17 @@ BoundingBox Actor::calculateBoundingBox() const
         glm::vec3(max.x, max.y, max.z)
     };
 
-    // Initialize transformed bounding box
     glm::vec3 transformedMin(FLT_MAX);
     glm::vec3 transformedMax(-FLT_MAX);
 
-    // Apply the actor's world transformation to all corners
     for (const auto& corner : corners)
     {
         glm::vec3 transformedCorner = glm::vec3(getModelMatrix() * glm::vec4(corner, 1.0f));
 
-        // Update the transformed bounding box
         transformedMin = glm::min(transformedMin, transformedCorner);
         transformedMax = glm::max(transformedMax, transformedCorner);
     }
 
-    // Set the transformed bounding box
     BoundingBox transformedBox;
     transformedBox.min = transformedMin;
     transformedBox.max = transformedMax;

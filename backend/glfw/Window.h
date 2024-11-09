@@ -54,7 +54,8 @@ public:
     void update();
     void destroy();
     
-    bool isRunning() { return !glfwWindowShouldClose(window); };
+    void resetUpdateTimer();
+    
     std::vector<Resolution> queryResolutions();
     
 private:

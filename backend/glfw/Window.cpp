@@ -5,7 +5,7 @@
 #include "Game.h"
 
 
-std::chrono::high_resolution_clock::time_point previousTime = std::chrono::high_resolution_clock::now();
+std::chrono::high_resolution_clock::time_point previousTime;
 
 
 Window::Window()
@@ -45,15 +45,22 @@ void Window::init(void* pointer, World* w)
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
 }
 
+void Window::resetUpdateTimer()
+{
+    previousTime = std::chrono::high_resolution_clock::now();
+}
 
 void Window::update()
 {
+    glfwPollEvents();
+    
     auto currentTime = std::chrono::high_resolution_clock::now();
     deltaTime = std::chrono::duration<double>(currentTime - previousTime).count();
     
     double accumulatedTime = deltaTime;
 
-    while (accumulatedTime > TARGET_DELTA_TIME) {
+    while (accumulatedTime > TARGET_DELTA_TIME)
+    {
         world->update(TARGET_DELTA_TIME);
         accumulatedTime -= TARGET_DELTA_TIME;
     }
@@ -62,7 +69,7 @@ void Window::update()
 
   
 //    std::cout << 1 / deltaTime << std::endl;
-    glfwPollEvents();
+    
 
     if (!isFocused)
     {

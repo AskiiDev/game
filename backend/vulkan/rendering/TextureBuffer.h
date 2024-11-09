@@ -15,6 +15,8 @@ public:
     uint8_t loadedTextures = 0;
     
 private:
+    bool linearFiltering = true;
+    
     DeviceManager* deviceManager;
     VkCommandPool commandPool;
     

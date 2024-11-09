@@ -1,5 +1,7 @@
 #include "Game.h"
 
+#include <thread>
+#include <chrono>
 
 
 Game::Game()
@@ -42,10 +44,20 @@ void Game::initAudio()
 
 void Game::mainLoop()
 {
-    while (gameWindow.isRunning())
+    while (glfwGetWindowAttrib(gameWindow.window, GLFW_VISIBLE) == GLFW_FALSE ||
+           glfwGetWindowAttrib(gameWindow.window, GLFW_FOCUSED) == GLFW_FALSE)
+    {
+        glfwPollEvents();
+    }
+    
+    
+    gameWindow.resetUpdateTimer();
+    
+    while (!glfwWindowShouldClose(gameWindow.window))
     {
         gameWindow.update();
         vkManager.draw();
+//        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 

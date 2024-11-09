@@ -8,28 +8,12 @@
 #include "CollisionData.h"
 #include "CollisionConstants.h"
 
-/**
- * @brief Checks for collision between two actors.
- *
- * This function determines whether two actors are colliding based on their
- * bounding boxes and the player's location. If a collision is detected,
- * it fills the provided collision results with details about the collision.
- *
- * @param playerLocation The current location of the player.
- * @param actorA The first actor to check for collision.
- * @param actorB The second actor to check for collision.
- * @param collisionResultA Reference to a CollisionResult object to store
- *                         results for actorA.
- * @param collisionResultB Reference to a CollisionResult object to store
- *                         results for actorB.
- * @return True if a collision is detected, false otherwise.
- */
+
 bool doesActorCollideWithActor(
     const glm::vec3& playerLocation,
     const Actor& actorA,
     const Actor& actorB,
-    DetailedCollisionResponse& collisionResultA,
-    DetailedCollisionResponse& collisionResultB
+    DetailedCollisionResponse& collisionResult
 )
 {
     if (&actorA == &actorB)
@@ -57,15 +41,11 @@ bool doesActorCollideWithActor(
     const BoundingBox aBox = actorA.getBoundingBox();
     const BoundingBox bBox = actorB.getBoundingBox();
     
-    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResultA.penetrationInfo, collisionResultB.penetrationInfo))
+    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResult.penetrationInfo))
     {
-        collisionResultA.collisionSurface = actorB.getCollisionSurface();
-        collisionResultA.collisionPoint = actorA.getWorldLocation();
-        collisionResultA.impactVelocity = actorA.getActorVelocity();
-        
-        collisionResultB.collisionSurface = actorA.getCollisionSurface();
-        collisionResultB.collisionPoint = actorB.getWorldLocation();
-        collisionResultB.impactVelocity = actorB.getActorVelocity();
+        collisionResult.collisionSurface = actorB.getCollisionSurface();
+        collisionResult.collisionPoint = actorA.getWorldLocation();
+        collisionResult.impactVelocity = actorA.getActorVelocity();
         
         return true;
     }
@@ -82,38 +62,41 @@ bool doesActorCollideWithActor(
  *
  * @param playerLocation The current location of the player.
  * @param worldActors A vector of actors in the world to check for collisions.
- * @param deltaTime The time delta used to update the positions of actors.
  */
 void collideWorldActors(
     const glm::vec3& playerLocation,
-    std::vector<Actor>& worldActors,
-    const double deltaTime
+    std::vector<Actor>& worldActors
 )
 {
-    DetailedCollisionResponse collisionResultA;
-    DetailedCollisionResponse collisionResultB;
+    DetailedCollisionResponse collisionResult;
     
-    for (size_t i = 0; i < worldActors.size(); ++i)
+    std::vector<Actor*> collidedActors;
+    std::vector<glm::vec3> collidedVelocities;
+    
+    for (size_t i = 0; i < worldActors.size(); i++)
     {
-        Actor& actorA = worldActors[i];
+        Actor& actorB = worldActors[i];
         
-        for (size_t j = i + 1; j < worldActors.size(); ++j)
+        for (size_t j = 0; j < worldActors.size(); j++)
         {
-            Actor& actorB = worldActors[j];
+            Actor& actorA = worldActors[j];
             
-            if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResultA, collisionResultB))
+            if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResult))
             {
                 if (actorA.getPhysicsEnabled())
                 {
-                    actorA.addActorLocation((glm::length(collisionResultA.impactVelocity) + collisionResultA.penetrationInfo.penetrationDepth) * collisionResultA.penetrationInfo.collisionNormal);
-                }
-                
-                if (actorB.getPhysicsEnabled())
-                {
-                    actorB.addActorLocation((glm::length(collisionResultB.impactVelocity) + collisionResultB.penetrationInfo.penetrationDepth) * collisionResultB.penetrationInfo.collisionNormal);
+                    actorA.addActorLocation((collisionResult.penetrationInfo.penetrationDepth) * collisionResult.penetrationInfo.collisionNormal);
+                    collidedActors.push_back(&actorA);
+//                    collidedVelocities.push_back(actorA.getActorVelocity() * 0.05f + actorB.getActorVelocity() * 0.95f);
                 }
             }
         }
+    }
+    
+    for (size_t i = 0; i < collidedActors.size(); ++i)
+    {
+        collidedActors[i]->cacheBoundingBox();
+//        collidedActors[i]->setActorVelocity(collidedVelocities[i]);
     }
 }
 
@@ -143,6 +126,8 @@ bool doesPlayerCollideWithActors(
     
     glm::vec3 accumulatedNormals(0, 0, 0);
     glm::vec3 accumulatedPenetrationNormals(0, 0, 0);
+    
+    collisionResult.penetrationInfo.penetrationDepth = 0;
     
     for (const Actor& actor : worldActors)
     {
@@ -211,43 +196,22 @@ void movePlayerWithCollision(
     const double deltaTime
 )
 {
-//    if (!player) return;
+    if (!player) return;
     
     glm::vec3 playerVelocity = player->getPlayerVelocity();
     glm::vec3 nextLocation = player->predictNextPlayerLocation(playerVelocity, deltaTime);
-    
     DetailedCollisionResponse collisionResult;
     
     if (doesPlayerCollideWithActors(nextLocation, worldActors, collisionResult))
     {
-        glm::vec3 slideVelocity = playerVelocity -
-        glm::dot(playerVelocity, collisionResult.penetrationInfo.collisionNormal) *
-        collisionResult.penetrationInfo.collisionNormal;
+        playerVelocity -= (collisionResult.collisionSurface.friction) *
+                          (playerVelocity - glm::dot(playerVelocity,
+                           collisionResult.penetrationInfo.collisionNormal) *
+                           collisionResult.penetrationInfo.collisionNormal);
         
-        glm::vec3 frictionVelocity = slideVelocity -
-                                     collisionResult.collisionSurface.friction *
-                                     slideVelocity;
-
-        if (glm::length(frictionVelocity) > glm::length(slideVelocity))
-        {
-            frictionVelocity = glm::vec3(0.0f);
-        }
-
-        nextLocation = player->predictNextPlayerLocation(frictionVelocity, deltaTime);
-        
-        if (doesPlayerCollideWithActors(nextLocation, worldActors, collisionResult))
-        {
-            float impactVelocity = glm::length(collisionResult.impactVelocity);
-            
-            if (impactVelocity == 0)
-            {
-                impactVelocity = 1;
-            }
-            
-            nextLocation = player->predictNextPlayerLocation(frictionVelocity +
-                                  (impactVelocity + collisionResult.penetrationInfo.penetrationDepth) *
-                                  collisionResult.penetrationInfo.collisionNormal, deltaTime);
-        }
+        nextLocation = (collisionResult.penetrationInfo.penetrationDepth) *
+                        collisionResult.penetrationInfo.collisionNormal +
+                        player->predictNextPlayerLocation(playerVelocity, deltaTime);
     }
     
     player->movePlayer(nextLocation);

@@ -12,9 +12,12 @@ void TextureBuffer::init(DeviceManager* d, VkCommandPool cp)
     deviceManager = d;
     commandPool = cp;
     
-//    createTextureImage("res/models/sword/face.jpg");
+    linearFiltering = true;
+    
     createTextureImage("res/models/cat.png");
+//    createTextureImage("res/textures/brick2.jpg");
     createTextureImage("res/models/car.jpg");
+    createTextureImage("res/textures/floor/floor.jpeg");
     
 //    createTextureImage("res/models/sword/sword.jpg");
 //    createTextureImage("res/models/chateau.jpg");
@@ -35,8 +38,20 @@ void TextureBuffer::createTextureSampler()
     
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     
-    samplerInfo.magFilter = VK_FILTER_LINEAR;
-    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    if (linearFiltering)
+    {
+        samplerInfo.magFilter = VK_FILTER_LINEAR;
+        samplerInfo.minFilter = VK_FILTER_LINEAR;
+        
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    }
+    else
+    {
+        samplerInfo.magFilter = VK_FILTER_NEAREST;
+        samplerInfo.minFilter = VK_FILTER_NEAREST;
+        
+        samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    }
     
     samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
     samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -47,9 +62,6 @@ void TextureBuffer::createTextureSampler()
     samplerInfo.unnormalizedCoordinates = VK_FALSE;
     samplerInfo.compareEnable = VK_FALSE;
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-    
-    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    
     samplerInfo.mipLodBias = 0.0f;
     samplerInfo.minLod = 0;
     samplerInfo.maxLod = 10;

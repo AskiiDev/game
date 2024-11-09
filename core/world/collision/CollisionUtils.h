@@ -8,6 +8,9 @@
 #include "CollisionConstants.h"
 
 
+using namespace std;
+
+
 bool collisionProfileEnabled(
     const Actor& actor,
     CollisionProfile profile
@@ -33,7 +36,7 @@ void calculateBoundingBoxCollisionNormal(
     const glm::vec3 worldLocation,
     const glm::vec3 min,
     const glm::vec3 max,
-    BasicCollisionResponse& collisionResult
+    glm::vec3& collisionNormal
 )
 {
     glm::vec3 deltaMin = worldLocation - min;
@@ -45,26 +48,44 @@ void calculateBoundingBoxCollisionNormal(
     
     if (nearestX < nearestY && nearestX < nearestZ)
     {
-        collisionResult.collisionNormal = glm::vec3((deltaMin.x < deltaMax.x) ? -1.0f : 1.0f, 0.0f, 0.0f);
-        collisionResult.penetrationDepth = nearestX;
+        collisionNormal = glm::vec3((deltaMin.x < deltaMax.x) ? -1.0f : 1.0f, 0.0f, 0.0f);
     }
     
     else if (nearestY < nearestX && nearestY < nearestZ)
     {
-        collisionResult.collisionNormal = glm::vec3(0.0f, (deltaMin.y < deltaMax.y) ? -1.0f : 1.0f, 0.0f);
-        collisionResult.penetrationDepth = nearestY;
+        collisionNormal = glm::vec3(0.0f, (deltaMin.y < deltaMax.y) ? -1.0f : 1.0f, 0.0f);
     }
     
     else
     {
-        collisionResult.collisionNormal = glm::vec3(0.0f, 0.0f, (deltaMin.z < deltaMax.z) ? -1.0f : 1.0f);
-        collisionResult.penetrationDepth = nearestZ;
+        collisionNormal = glm::vec3(0.0f, 0.0f, (deltaMin.z < deltaMax.z) ? -1.0f : 1.0f);
+    }
+}
+
+bool calculatePenetration(
+    const float amin,
+    const float amax,
+    const float bmin,
+    const float bmax,
+    float& penetrationDepth
+)
+{
+    const float d0 = bmax - amin;
+    const float d1 = amax - bmin;
+    
+    if (d0 < 0.f || d1 < 0.f)
+    {
+        return false;
     }
     
-    if (collisionResult.penetrationDepth < 0)
+    const float overlap = min(abs(d0), abs(d1));
+
+    if (overlap < penetrationDepth)
     {
-        collisionResult.penetrationDepth = 0;
+        penetrationDepth = (overlap);
     }
+    
+    return true;
 }
 
 bool isBoxInBoundingBox(
@@ -72,25 +93,21 @@ bool isBoxInBoundingBox(
     const glm::vec3& amax,
     const glm::vec3& bmin,
     const glm::vec3& bmax,
-    BasicCollisionResponse& collisionResultA,
-    BasicCollisionResponse& collisionResultB
+    BasicCollisionResponse& collisionResult
 )
 {
-    if (amax.x < bmin.x || amin.x > bmax.x) return false;
-    if (amax.y < bmin.y || amin.y > bmax.y) return false;
-    if (amax.z < bmin.z || amin.z > bmax.z) return false;
+    float penetrationDepth = FLT_MAX;
     
+    if (!calculatePenetration(amin.x, amax.x, bmin.x, bmax.x, penetrationDepth)) return false;
+    if (!calculatePenetration(amin.y, amax.y, bmin.y, bmax.y, penetrationDepth)) return false;
+    if (!calculatePenetration(amin.z, amax.z, bmin.z, bmax.z, penetrationDepth)) return false;
     
-    glm::vec3 closestPointA, closestPointB;
-    
-    glm::vec3 aCenter = (amin + amax) / 2.f;
-    glm::vec3 bCenter = (bmin + bmax) / 2.f;
-    
-    closestPointA = glm::clamp(bCenter, amin, amax) ;
-    closestPointB = glm::clamp(aCenter, bmin, bmax);
+    glm::vec3 closestPoint = (amax + amin) / 2.f;
 
-    calculateBoundingBoxCollisionNormal(closestPointA, bmin, bmax, collisionResultA);
-    calculateBoundingBoxCollisionNormal(closestPointB, amin, amax, collisionResultB);
+    calculateBoundingBoxCollisionNormal(closestPoint, bmin, bmax, collisionResult.collisionNormal);
+    collisionResult.penetrationDepth = (penetrationDepth) * 1.01;
+    
+//    std::cout << collisionResult.penetrationDepth << std::endl;
     
     return true;
 }
@@ -108,25 +125,14 @@ bool isSphereInBoundingBox(
         sphereOrigin.y >= min.y - radius && sphereOrigin.y <= max.y + radius &&
         sphereOrigin.z >= min.z - radius && sphereOrigin.z <= max.z + radius)
     {
-        glm::vec3 closestPoint = glm::clamp(sphereOrigin, min, max);
-        glm::vec3 direction = closestPoint - sphereOrigin;
+        float penetrationDepth = FLT_MAX;
+        calculatePenetration(sphereOrigin.x - radius, sphereOrigin.x + radius, min.x, max.x, penetrationDepth);
+        calculatePenetration(sphereOrigin.y - radius, sphereOrigin.y + radius, min.y, max.y, penetrationDepth);
+        calculatePenetration(sphereOrigin.z - radius, sphereOrigin.z + radius, min.z, max.z, penetrationDepth);
         
-        if (glm::length(direction) > 0.f)
-        {
-            direction = glm::normalize(direction);
-            collisionResult.penetrationDepth = glm::distance((sphereOrigin + direction * radius), closestPoint);
-            
-            if (collisionResult.penetrationDepth < 0)
-            {
-                collisionResult.penetrationDepth = 0;
-            }
-            
-            collisionResult.collisionNormal = -direction;
-        }
-        else
-        {
-            calculateBoundingBoxCollisionNormal(sphereOrigin, min, max, collisionResult);
-        }
+        calculateBoundingBoxCollisionNormal(sphereOrigin, min, max, collisionResult.collisionNormal);
+        collisionResult.penetrationDepth = penetrationDepth * 1.01f;
+        
         
         return true;
     }
@@ -144,17 +150,15 @@ bool isCapsuleInBoundingBox(
     const float radius
 )
 {
-    glm::vec3 closestPoint = glm::clamp(capsuleOrigin, min, max);
-    glm::vec3 axisPoint = capsuleOrigin + glm::dot(closestPoint - capsuleOrigin, capsuleOrientation) * capsuleOrientation;
+    glm::vec3 orientationHeight = capsuleOrientation * halfHeight;
+    glm::vec3 capsuleStart = capsuleOrigin - orientationHeight;
+    glm::vec3 capsuleDirection = 2.f * orientationHeight;
     
-    float distance = glm::distance(axisPoint, capsuleOrigin);    
+    float t = glm::clamp(glm::dot(glm::clamp(capsuleOrigin, min, max) - capsuleStart, capsuleDirection) / glm::dot(capsuleDirection, capsuleDirection), 0.0f, 1.0f);
     
-    if (distance * distance <= halfHeight * halfHeight)
+    if (isSphereInBoundingBox(capsuleStart + t * capsuleDirection, min, max, collisionResult, radius))
     {
-        if (isSphereInBoundingBox(axisPoint, min, max, collisionResult, radius))
-        {
-            return true;
-        }
+        return true;
     }
     
     return false;

@@ -13,12 +13,12 @@ Player::Player()
 
 void Player::init()
 {
-    camera.worldLocation = glm::vec3(0.f, 2.3f, -5.f);
+    camera.worldLocation = glm::vec3(4.f, 2.3f, -5.f);
     camera.forwardVector = glm::vec3(0.f, 0.f, -1.f);
     camera.worldUpVector = glm::vec3(0.f, 1.f, 0.f);
 
-    camera.yaw = 180.f;
-    camera.pitch = -80.f;
+    camera.yaw = 175.f;
+    camera.pitch = -35.f;
 }
 
 

@@ -154,7 +154,7 @@ void RenderPipeline::createDescriptorSetLayout()
     
     VkDescriptorSetLayoutBinding textureLayoutBinding{};
     textureLayoutBinding.binding = 2;
-    textureLayoutBinding.descriptorCount = textureBuffer.loadedTextures; // Use your desired maximum number of textures
+    textureLayoutBinding.descriptorCount = textureBuffer.loadedTextures;
     textureLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
     textureLayoutBinding.pImmutableSamplers = nullptr;
     textureLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -178,11 +178,16 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 
     ubo.view = player->getCamera().viewMatrix;
         
-    ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 10.0f);
+    ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 15.0f);
     
     player->setProjectionMatrix(ubo.proj);
     
     ubo.proj[1][1] *= -1;
+    
+    ubo.time = glfwGetTime();
+    
+    ubo.screenResolution.x = swapChain->window->desiredResolution.width;
+    ubo.screenResolution.y = swapChain->window->desiredResolution.height;
 
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 }

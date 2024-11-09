@@ -51,6 +51,8 @@ public:
     
     Object getObject() const;
     
+    
+    void cacheBoundingBox();
     BoundingBox getBoundingBox() const;
     BoundingBox calculateBoundingBox() const;
     
@@ -72,6 +74,7 @@ public:
     void setActorScale(const glm::vec3& scale);
     
     void addActorLocation(const glm::vec3& addLocation);
+    void addActorLocationContinuous(const glm::vec3& addLocation);
     void addActorRotation(const glm::vec3& addRotation);
     void addActorScale(const glm::vec3& addScale);
     
