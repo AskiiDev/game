@@ -15,19 +15,18 @@ enum Direction
 };
 
 class Player : public Actor {
-public:
-    uint8_t mvDirection = 0;
-    
 private:
-    glm::vec3 playerVelocity = glm::vec3(0, 0, 0);
+    uint8_t movementDirection = 0;
     float playerSpeed = 1.4f;
     
 public:
     Player(const Object& o, const Transform& t);
     
-    glm::vec3 getPlayerVelocity();
-
-    void setPlayerVelocity(const glm::vec3& velocity);
+    void movePlayerWithInput();
+    
+    void setMovementDirection(const Direction direction);
+    void addMovementDirection(const Direction direction);
+    void removeMovementDirection(const Direction direction);
 };
 
 #endif

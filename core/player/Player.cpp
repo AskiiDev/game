@@ -11,7 +11,22 @@ Player::Player(const Object& o, const Transform& t) : Actor(o, t)
     setPhysicsEnabled(true);
 }
 
-glm::vec3 Player::getPlayerVelocity()
+void Player::setMovementDirection(const Direction direction)
+{
+    movementDirection = direction;
+}
+
+void Player::addMovementDirection(const Direction direction)
+{
+    movementDirection |= direction;
+}
+
+void Player::removeMovementDirection(const Direction direction)
+{
+    movementDirection &= ~direction;
+}
+
+void Player::movePlayerWithInput()
 {
     glm::vec3 forwardDelta = glm::vec3(0, 0, -1);
     glm::vec3 rightDelta = glm::vec3(1, 0, 0);
@@ -19,22 +34,22 @@ glm::vec3 Player::getPlayerVelocity()
     glm::vec3 desiredMovement = glm::vec3(0.0f);
     
     
-    if (mvDirection & MV_FORWARD)
+    if (movementDirection & MV_FORWARD)
     {
         desiredMovement += forwardDelta;
     }
         
-    if (mvDirection & MV_BACKWARD)
+    if (movementDirection & MV_BACKWARD)
     {
         desiredMovement -= forwardDelta;
     }
         
-    if (mvDirection & MV_LEFT)
+    if (movementDirection & MV_LEFT)
     {
         desiredMovement -= rightDelta;
     }
         
-    if (mvDirection & MV_RIGHT)
+    if (movementDirection & MV_RIGHT)
     {
         desiredMovement += rightDelta;
     }
@@ -44,12 +59,9 @@ glm::vec3 Player::getPlayerVelocity()
         desiredMovement = glm::normalize(desiredMovement);
     }
     
-    setActorVelocity(desiredMovement * playerSpeed);
-    return playerVelocity;
+    glm::vec3 velocity = desiredMovement * playerSpeed;
+    velocity.y = getActorVelocity().y;
     
+    setActorVelocity(velocity);
 }
 
-void Player::setPlayerVelocity(const glm::vec3& velocity)
-{
-    playerVelocity = velocity;
-}

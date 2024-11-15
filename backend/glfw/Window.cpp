@@ -73,7 +73,7 @@ void Window::update()
 
     if (!isFocused)
     {
-        player->mvDirection = 0;
+        player->setMovementDirection(Direction::MV_NONE);
     }
 
     updateCursorDelta();
@@ -197,30 +197,30 @@ void Window::handleKeyboardInput(int key, int scancode, int action, int mods)
         }
                 
         if (key == GLFW_KEY_W)
-            player->mvDirection |= MV_FORWARD;
+            player->addMovementDirection(Direction::MV_FORWARD);
             
         if (key == GLFW_KEY_S)
-            player->mvDirection |= MV_BACKWARD;
+            player->addMovementDirection(Direction::MV_BACKWARD);
 
         if (key == GLFW_KEY_A)
-            player->mvDirection |= MV_LEFT;
+            player->addMovementDirection(Direction::MV_LEFT);
                 
         if (key == GLFW_KEY_D)
-            player->mvDirection |= MV_RIGHT;
+            player->addMovementDirection(Direction::MV_RIGHT);
     }
     else if (action == GLFW_RELEASE)
     {
         if (key == GLFW_KEY_W)
-            player->mvDirection &= ~MV_FORWARD;
+            player->removeMovementDirection(Direction::MV_FORWARD);
             
         if (key == GLFW_KEY_S)
-            player->mvDirection &= ~MV_BACKWARD;
+            player->removeMovementDirection(Direction::MV_BACKWARD);
 
         if (key == GLFW_KEY_A)
-            player->mvDirection &= ~MV_LEFT;
+            player->removeMovementDirection(Direction::MV_LEFT);
                 
         if (key == GLFW_KEY_D)
-            player->mvDirection &= ~MV_RIGHT;
+            player->removeMovementDirection(Direction::MV_RIGHT);
     }
 }
 
