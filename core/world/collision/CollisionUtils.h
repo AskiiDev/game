@@ -8,6 +8,11 @@
 #include "CollisionConstants.h"
 
 
+#define X_AXIS glm::vec3(1, 0, 0)
+#define Y_AXIS glm::vec3(0, 1, 0)
+#define Z_AXIS glm::vec3(0, 0, 1)
+
+
 using namespace std;
 
 
@@ -63,11 +68,13 @@ void calculateBoundingBoxCollisionNormal(
 }
 
 bool calculatePenetration(
+    const glm::vec3& axis,
     const float amin,
     const float amax,
     const float bmin,
     const float bmax,
-    float& penetrationDepth
+    float& penetrationDepth,
+    glm::vec3& penetrationAxis
 )
 {
     const float d0 = bmax - amin;
@@ -78,10 +85,19 @@ bool calculatePenetration(
         return false;
     }
     
-    const float overlap = min(abs(d0), abs(d1));
+    const float overlap = min(d0, d1);
 
     if (overlap < penetrationDepth)
     {
+        if (d0 < d1)
+        {
+            penetrationAxis = axis;
+        }
+        else
+        {
+            penetrationAxis = -axis;
+        }
+        
         penetrationDepth = (overlap);
     }
     
@@ -97,17 +113,18 @@ bool isBoxInBoundingBox(
 )
 {
     float penetrationDepth = FLT_MAX;
+    glm::vec3 penetrationAxis;
     
-    if (!calculatePenetration(amin.x, amax.x, bmin.x, bmax.x, penetrationDepth)) return false;
-    if (!calculatePenetration(amin.y, amax.y, bmin.y, bmax.y, penetrationDepth)) return false;
-    if (!calculatePenetration(amin.z, amax.z, bmin.z, bmax.z, penetrationDepth)) return false;
+    if (!calculatePenetration(X_AXIS, amin.x, amax.x, bmin.x, bmax.x, penetrationDepth, penetrationAxis)) return false;
+    if (!calculatePenetration(Y_AXIS, amin.y, amax.y, bmin.y, bmax.y, penetrationDepth, penetrationAxis)) return false;
+    if (!calculatePenetration(Z_AXIS, amin.z, amax.z, bmin.z, bmax.z, penetrationDepth, penetrationAxis)) return false;
     
-    glm::vec3 closestPoint = (amax + amin) / 2.f;
+//    glm::vec3 closestPointA = (amax + amin) * .5f;
+//    glm::vec3 closestPointB = (bmax + bmin) * .5f;
 
-    calculateBoundingBoxCollisionNormal(closestPoint, bmin, bmax, collisionResult.collisionNormal);
-    collisionResult.penetrationDepth = (penetrationDepth) * 1.01;
-    
-//    std::cout << collisionResult.penetrationDepth << std::endl;
+//    calculateBoundingBoxCollisionNormal(closestPoint, bmin, bmax, collisionResult.collisionNormal);
+    collisionResult.penetrationDepth = (penetrationDepth) * PENETRATION_DEPTH_FORCE;
+    collisionResult.collisionNormal = penetrationAxis;
     
     return true;
 }
@@ -126,13 +143,14 @@ bool isSphereInBoundingBox(
         sphereOrigin.z >= min.z - radius && sphereOrigin.z <= max.z + radius)
     {
         float penetrationDepth = FLT_MAX;
-        calculatePenetration(sphereOrigin.x - radius, sphereOrigin.x + radius, min.x, max.x, penetrationDepth);
-        calculatePenetration(sphereOrigin.y - radius, sphereOrigin.y + radius, min.y, max.y, penetrationDepth);
-        calculatePenetration(sphereOrigin.z - radius, sphereOrigin.z + radius, min.z, max.z, penetrationDepth);
+        glm::vec3 penetrationAxis;
+        
+        calculatePenetration(X_AXIS, sphereOrigin.x - radius, sphereOrigin.x + radius, min.x, max.x, penetrationDepth, penetrationAxis);
+        calculatePenetration(Y_AXIS, sphereOrigin.y - radius, sphereOrigin.y + radius, min.y, max.y, penetrationDepth, penetrationAxis);
+        calculatePenetration(Z_AXIS, sphereOrigin.z - radius, sphereOrigin.z + radius, min.z, max.z, penetrationDepth, penetrationAxis);
         
         calculateBoundingBoxCollisionNormal(sphereOrigin, min, max, collisionResult.collisionNormal);
-        collisionResult.penetrationDepth = penetrationDepth * 1.01f;
-        
+        collisionResult.penetrationDepth = penetrationDepth * PENETRATION_DEPTH_FORCE;
         
         return true;
     }

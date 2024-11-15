@@ -4,6 +4,7 @@
 
 #include "VulkanUtils.h"
 #include "DeviceManager.h"
+#include "World.h"
 #include "stb_image.h"
 
 
@@ -24,10 +25,12 @@ private:
     std::vector<VkImage> textureImage;
     std::vector<VkDeviceMemory> textureImageMemory;
     
+    World* world;
+    
 public:
     TextureBuffer();
     
-    void init(DeviceManager* d, VkCommandPool cp);
+    void init(DeviceManager* d, VkCommandPool cp, World* w);
     void destroy();
 
 private:
@@ -37,6 +40,8 @@ private:
     void createTextureImage(const char* filename);
     void createTextureImageView();
     void createTextureSampler();
+    
+    void populateBuffers();
 };
 
 #endif

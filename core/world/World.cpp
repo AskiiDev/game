@@ -4,68 +4,75 @@
 #include <GLFW/glfw3.h>
 
 
-World::World()
+World::World() : player(loadObject("res/models/barrel.obj", "res/models/barrel.png"), { glm::vec3(0.f, 0.f, -5.f), glm::vec3(-0.f, 0.f, 0.f), glm::vec3(4.f) })
 {
+    worldActors.push_back(player);
+    worldObjects.push_back(player.getObject());
 }
 
 
 void World::load()
 {
-    player.init();
-    
     Transform t;
     Object o;
-    
-    t = { glm::vec3(0.f, 0.0f, 0.f), glm::vec3(0.f, 180.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    o = loadObject("res/models/shadow_cat.obj", 0);
-    Actor a(o, t);
-    
-    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f) };
-    Actor c(o, t);
-    
-    t = { glm::vec3(-3.f, -0.3f, -4.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(7.f, 1.f, 7.f) };
-    o = loadObject("res/models/floor.obj", 2);
-    Actor floor(o, t);
-    
-    floor.setCollisionProfile(CW_PLAYER);
-    a.setPhysicsEnabled(true);
-//    c.setPhysicsEnabled(true);
-    
-//    a.setActorVelocity(glm::vec3(0, 0, -15));
-//    b.setPhysicsEnabled(true);
-    
-    worldActors.push_back(a);
-    worldActors.push_back(c);
+
+    o = loadObject("res/models/cube.obj", "res/models/crate.jpg");
+    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(-0.f, 0.f, 0.f), glm::vec3(4.f) };
+
+    createActor(o, t)->setPhysicsEnabled(true);
+    /*--------------*/
     
     
-//    worldActors.push_back(b);
+    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(4.f) };
+
+    createActor(o, t)->setPhysicsEnabled(true);
+    /*--------------*/
     
-    worldActors.push_back(floor);
+
+    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(4.f) };
+
+    createActor(o, t)->setPhysicsEnabled(true);
+    /*--------------*/
     
     
+    t = { glm::vec3(0.f, 9.f, -5.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(4.f) };
+
+    createActor(o, t)->setPhysicsEnabled(true);
+    /*--------------*/
+    
+    
+    t = { glm::vec3(-3.f, -1.f, -4.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(5.f, 1.f, 5.f) };
+    o = loadObject("res/models/floor.obj", "res/textures/floor/floor4.jpg");
+    
+    createActor(o, t)/*->setCollisionProfile(CW_PLAYER)*/;
+//    /*--------------*/
 }
 
 void World::update(const double deltaTime)
 {
-    worldActors[0].setActorVelocity(glm::vec3(0, 0, -1));
-    worldActors[0].addActorRotation(glm::vec3(0, 20, 0));
-    
+//    player->getPlayerVelocity();
+//    DEBUG_LogVec3(worldActors[0].getActorVelocity());
+//    worldActors[0].setActorVelocity(glm::vec3(player.getPlayerVelocity().x, worldActors[0].getActorVelocity().y, player.getPlayerVelocity().z));
+
+
     // update actors
     for (Actor& actor : worldActors)
     {
         if (actor.getActive())
         {
+            collideWorldActors(glm::vec3(0), worldActors);
             actor.update(deltaTime);
         }
     }
     
-    collideWorldActors(player.getPlayerLocation(), worldActors);
+    collideWorldActors(glm::vec3(0), worldActors);
     
-    movePlayerWithCollision(getPlayerAsRef(), worldActors, deltaTime);
-    getPlayerAsRef()->updateCameraVectors();
+    
+//    movePlayerWithCollision(getPlayerAsRef(), worldActors, deltaTime);
+//    getPlayerAsRef()->updateCameraVectors();
     
     // actor culling
-    frustumCullActors(player, worldActors);
+//    frustumCullActors(player, worldActors);
 
     
 //    worldActors[0].setActorScale(glm::vec3(0.5f + sin(glfwGetTime() * 2.f) * sin(glfwGetTime() * 2.f),
@@ -100,8 +107,14 @@ Player* World::getPlayerAsRef()
     return &player;
 }
 
-void World::pushActor(Actor& newActor)
+Actor* World::createActor(const Object& obj, const Transform& transform)
 {
-    worldActors.push_back(newActor);
+    worldActors.push_back(Actor(obj, transform));
+    
+    if (std::find(worldObjects.begin(), worldObjects.end(), obj) == worldObjects.end())
+    {
+        worldObjects.push_back(obj);
+    }
+    
+    return &worldActors.back();
 }
-

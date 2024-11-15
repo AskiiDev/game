@@ -7,25 +7,25 @@ TextureBuffer::TextureBuffer()
 }
 
 
-void TextureBuffer::init(DeviceManager* d, VkCommandPool cp)
+void TextureBuffer::init(DeviceManager* d, VkCommandPool cp, World* w)
 {
     deviceManager = d;
     commandPool = cp;
+    world = w;
     
-    linearFiltering = true;
+    linearFiltering = false;
     
-    createTextureImage("res/models/cat.png");
-//    createTextureImage("res/textures/brick2.jpg");
-    createTextureImage("res/models/car.jpg");
-    createTextureImage("res/textures/floor/floor.jpeg");
-    
-//    createTextureImage("res/models/sword/sword.jpg");
-//    createTextureImage("res/models/chateau.jpg");
-
-//    createTextureImage("res/textures/checkerboard.jpg");
-//    createTextureImage("res/textures/knight.jpg");
-    
+    populateBuffers();
     createTextureSampler();
+}
+
+
+void TextureBuffer::populateBuffers()
+{
+    for (const Object& obj : world->getWorldObjects())
+    {
+        createTextureImage(obj.texture);
+    }
 }
 
 

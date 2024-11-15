@@ -1,19 +1,19 @@
 #include "Actor.h"
 #include <GLFW/glfw3.h>
+//#include "Log.h"
 
 
-Actor::Actor(const Object o, const Transform t)
+Actor::Actor(const Object& o, const Transform& t)
 {
     obj = o;
     worldTransform = t;
+    cacheBoundingBox();
 }
 
-
-Actor::Actor(const Object o, const Transform t, const CollisionProfile cp) : Actor(o, t)
+Actor::Actor(const Object& o, const Transform& t, const CollisionProfile& cp) : Actor(o, t)
 {
     collisionProfile = cp;
 }
-
 
 void Actor::update(const double dt)
 {
@@ -21,14 +21,8 @@ void Actor::update(const double dt)
     
     if (physicsEnabled)
     {
+        actorVelocity.y += gravitationalAcceleration;
         addActorLocationContinuous(actorVelocity);
-        actorVelocity *= 0.98f;
-    }
-    
-    if (hasUpdatedSinceLastDraw)
-    {
-        cacheBoundingBox();
-        hasUpdatedSinceLastDraw = false;
     }
 }
 
@@ -95,28 +89,22 @@ Object Actor::getObject() const
 
 void Actor::setActorLocation(const glm::vec3& location)
 {
-    if (!hasUpdatedSinceLastDraw)
-        hasUpdatedSinceLastDraw = true;
-    
     worldTransform.worldLocation = location;
+    cacheBoundingBox();
 }
 
 
 void Actor::setActorRotation(const glm::vec3& rotation)
 {
-    if (!hasUpdatedSinceLastDraw)
-        hasUpdatedSinceLastDraw = true;
-    
     worldTransform.worldRotation = rotation;
+    cacheBoundingBox();
 }
 
 
 void Actor::setActorScale(const glm::vec3& scale)
 {
-    if (!hasUpdatedSinceLastDraw)
-        hasUpdatedSinceLastDraw = true;
-    
     worldTransform.worldScale = scale;
+    cacheBoundingBox();
 }
 
 void Actor::addActorLocationContinuous(const glm::vec3& addLocation)
@@ -142,6 +130,16 @@ void Actor::addActorScale(const glm::vec3& addScale)
 void Actor::setActorVelocity(const glm::vec3 &velocity)
 {
     actorVelocity = velocity;
+}
+
+void Actor::setGravitationalAcceleration(const float acceleration)
+{
+    gravitationalAcceleration = acceleration;
+}
+
+void Actor::setGravitationalVelocity(const float velocity)
+{
+    actorVelocity.y = velocity;
 }
 
 void Actor::setCulled(const bool occlude)
@@ -242,3 +240,7 @@ float Actor::getApproximateBoundingRadius() const
     return glm::max(max.x - min.x, glm::max(max.y - min.y, max.z - min.z)) / 2.0f;
 }
 
+
+void Actor::onActorCollision(const DetailedCollisionResponse& collisionResult)
+{
+}

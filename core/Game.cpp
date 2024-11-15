@@ -17,7 +17,7 @@ void Game::run()
     initVulkan();
     
     initAudio();
-//    audioManager.playFromSource(0, "res/sfx/ui/startup.wav");
+//    audioManager.playFromSource(0, "res/sfx/physics/bonk.wav");
     
     mainLoop();
     cleanUp();

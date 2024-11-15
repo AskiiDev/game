@@ -9,6 +9,10 @@
 #include "IOUtils.h"
 
 
+#define NUM_SOURCES 8
+#define NUM_BUFFERS 12
+
+
 struct WAVHeader {
     char riff[4]; // "RIFF"
     uint32_t fileSize;
@@ -28,8 +32,8 @@ struct WAVHeader {
 
 class AudioManager {
 public:
-    ALuint sources[8];
-    ALuint buffers[12];
+    ALuint sources[NUM_SOURCES];
+    ALuint buffers[NUM_BUFFERS];
     
 private:
     ALCdevice* device;
@@ -48,7 +52,7 @@ private:
     void generateSources();
     
     void loadPCM(uint8_t iD, const std::string& filename);
-
+    
 };
 
 #endif

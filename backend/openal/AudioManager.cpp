@@ -47,7 +47,7 @@ void AudioManager::playFromSource(uint8_t iD, const std::string& filename)
 void AudioManager::generateBuffers()
 {
     alGetError();
-    alGenBuffers(12, buffers);
+    alGenBuffers(NUM_BUFFERS, buffers);
     alGetError();
 }
 
@@ -55,7 +55,7 @@ void AudioManager::generateBuffers()
 void AudioManager::generateSources()
 {
     alGetError();
-    alGenSources(8, sources);
+    alGenSources(NUM_SOURCES, sources);
     alGetError();
 }
 

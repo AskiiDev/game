@@ -8,6 +8,9 @@
 #include <chrono>
 
 
+#define ORTHO_HEIGHT 5.f
+
+
 RenderPipeline::RenderPipeline()
 {
 }
@@ -32,7 +35,7 @@ void RenderPipeline::init(DeviceManager* d, SwapChain* s, World* w)
     
     createFramebuffers();
     
-    textureBuffer.init(deviceManager, commandPool);
+    textureBuffer.init(deviceManager, commandPool, w);
     vertexBuffer.init(deviceManager, commandPool, w);
     
     createUniformBuffers();
@@ -176,11 +179,28 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 {
     UniformBufferObject ubo{};
 
-    ubo.view = player->getCamera().viewMatrix;
-        
-    ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height, 0.02f, 15.0f);
+//    ubo.view = player->getCamera().viewMatrix;
+    ubo.view = glm::lookAt(
+        world->getPlayerAsRef()->getWorldLocation() + glm::vec3(13),
+        world->getPlayerAsRef()->getWorldLocation(),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
     
-    player->setProjectionMatrix(ubo.proj);
+    
+    ubo.cameraPos = world->getPlayerAsRef()->getWorldLocation();
+        
+//    ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float)
+//                                                    swapChain->swapChainExtent.height, 0.02f, 15.0f);
+
+    const float aspectRatio = swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height;
+    ubo.proj = glm::ortho(
+        -ORTHO_HEIGHT * aspectRatio,
+         ORTHO_HEIGHT * aspectRatio,
+        -ORTHO_HEIGHT,
+         ORTHO_HEIGHT,
+         0.01f,
+         32.f
+    );
     
     ubo.proj[1][1] *= -1;
     

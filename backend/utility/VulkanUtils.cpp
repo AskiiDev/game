@@ -10,7 +10,10 @@
 #include <tiny_obj_loader.h>
 
 
-Object loadObject(const char* filename, uint8_t textureID)
+size_t MAX_TEX_ID = 0;
+
+
+Object loadObject(const char* model, const char* texture)
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
@@ -22,7 +25,7 @@ Object loadObject(const char* filename, uint8_t textureID)
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename))
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, model))
     {
         throw std::runtime_error(warn + err);
     }
@@ -50,14 +53,14 @@ Object loadObject(const char* filename, uint8_t textureID)
             
             vertex.color = {1.0f, 1.0f, 1.0f};
             
-            vertex.normal =
-            {
-                attrib.normals[3 * index.normal_index + 0],
-                attrib.normals[3 * index.normal_index + 1],
-                attrib.normals[3 * index.normal_index + 2]
-            };
+//            vertex.normal =
+//            {
+//                attrib.normals[3 * index.normal_index + 0],
+//                attrib.normals[3 * index.normal_index + 1],
+//                attrib.normals[3 * index.normal_index + 2]
+//            };
             
-            vertex.texIndex = textureID;
+            vertex.texIndex = MAX_TEX_ID;
 
             if (uniqueVertices.count(vertex) == 0)
             {
@@ -66,13 +69,18 @@ Object loadObject(const char* filename, uint8_t textureID)
             }
 
             indices.push_back(uniqueVertices[vertex]);
+//            vertices.push_back(vertex);
+//            indices.push_back(static_cast<uint32_t>(vertices.size() - 1));
         }
     }
     
+    MAX_TEX_ID++;
+    
     obj.vertices = vertices;
     obj.indices = indices;
-    obj.textureID = textureID;
+    obj.texture = texture;
     obj.boundingBox = generateBoundingBox(vertices);
+    
     return obj;
 };
 

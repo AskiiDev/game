@@ -6,6 +6,7 @@ layout(binding = 0) uniform UniformBufferObject
     mat4 view;
     mat4 proj;
     vec2 screenResolution;
+    vec3 cameraPos;
     float time;
 } ubo;
 
@@ -19,15 +20,14 @@ layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec2 inTexCoord;
 layout(location = 3) in uint inTexIndex;
-layout(location = 4) in vec3 inNormal;
+//layout(location = 4) in vec3 inNormal;
 
 layout(location = 0) out vec3 fragColor;
-layout(location = 1) out vec2 fragTexCoord;
-layout(location = 2) out flat uint texIndex;
-layout(location = 3) out vec3 fragNormal;
-layout(location = 4) out float time;
-layout(location = 5) out vec2 screenResolution;
-//layout(location = 4) out vec3 fragPosition;
+layout(location = 1) out vec3 fragPos;
+layout(location = 2) out vec3 cameraPos;
+layout(location = 3) flat out uint texIndex;
+layout(location = 4) out vec2 fragTexCoord;
+layout(location = 5) out float time;
 
 
 vec4 snap(vec4 vertex, vec2 res)
@@ -47,10 +47,10 @@ void main()
     
 //    fragPosition = (ubo.proj * ubo.view * pc.modelMatrix * vec4(inPosition, 1.0));
     gl_Position = (ubo.proj * ubo.view * pc.modelMatrix * vec4(inPosition, 1.0));
+    fragPos = vec3(pc.modelMatrix * vec4(inPosition, 1.0));
+    cameraPos = ubo.cameraPos;
     fragColor = inColor;
     fragTexCoord = inTexCoord;
     texIndex = inTexIndex;
-    fragNormal = mat3(transpose(inverse(pc.modelMatrix))) * inNormal;
     time = ubo.time;
-    screenResolution = ubo.screenResolution;
 }

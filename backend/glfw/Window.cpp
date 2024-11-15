@@ -32,7 +32,7 @@ void Window::init(void* pointer, World* w)
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     
     desiredResolution = resolutions.back();
-//    desiredResolution = {1280, 832, 60};
+//    desiredResolution = {640, 480, 60};
     
     window = glfwCreateWindow(desiredResolution.width, desiredResolution.height, "game", nullptr, nullptr);
     
@@ -80,7 +80,7 @@ void Window::update()
 }
 
 
-
+    
 void Window::destroy()
 {
     glfwDestroyWindow(window);
@@ -103,9 +103,10 @@ void Window::updateCursorDelta()
     {
         deltaX = 0;
         deltaY = 0;
+        
         glfwSetCursorPos(window, prevX, prevY);
+        
         wasFocused = false;
-//        return;
     }
     
     double currX, currY;
@@ -118,7 +119,6 @@ void Window::updateCursorDelta()
     if (std::abs(deltaX) < deadZone) deltaX = 0;
     if (std::abs(deltaY) < deadZone) deltaY = 0;
     
-    // Apply smoothing
     const float smoothFactor = 0.5f;
     deltaX = deltaX * smoothFactor + lastDeltaX * (1 - smoothFactor);
     deltaY = deltaY * smoothFactor + lastDeltaY * (1 - smoothFactor);
@@ -128,9 +128,6 @@ void Window::updateCursorDelta()
         
     prevX = currX;
     prevY = currY;
-    
-    player->addCameraYaw(deltaX);
-    player->addCameraPitch(deltaY);
     
     updatingCursor = false;
 }

@@ -7,31 +7,31 @@
 
 class Actor {
 private:
+    glm::vec3 actorVelocity = glm::vec3(0);
     BoundingBox cachedBoundingBox;
     
-    bool hasUpdatedSinceLastDraw = true;
+    float gravitationalAcceleration = -0.3;
+    float deltaTime = 0.f;
+    
     bool physicsEnabled = false;
     
 protected:
-    Object obj;
     Transform worldTransform;
-    
-    glm::vec3 actorVelocity;
+    Object obj;
     
     CollisionProfile collisionProfile = CollisionProfile::CW_DEFAULT;
     CollisionSurface collisionSurface;
     
-    float deltaTime;
-    
-    bool isCulled = true;
+    bool isCulled = false;
     bool isActive = true;
     
     bool activityOverride = false;
     
 public:
     
-    Actor(const Object o, const Transform t);
-    Actor(const Object o, const Transform t, const CollisionProfile cp);
+    Actor(const Object& o, const Transform& t);
+    Actor(const Object& o, const Transform& t, const CollisionProfile& cp);
+    virtual ~Actor() = default;
     
     void update(const double deltaTime);
     
@@ -87,6 +87,12 @@ public:
     void setCollisionSurface(const CollisionSurface& cs);
     
     void setPhysicsEnabled(const bool enabled);
+    
+    void setGravitationalAcceleration(const float acceleration);
+    void setGravitationalVelocity(const float velocity);
+    
+    // Event Hooks
+    void onActorCollision(const DetailedCollisionResponse& collisionResult);
 };
 
 #endif

@@ -11,13 +11,15 @@
 #include "World.h"
 
 
-struct UniformBufferObject
+struct alignas(16) UniformBufferObject
 {
-    glm::mat4 view;
-    glm::mat4 proj;
-    glm::vec2 screenResolution;
-    float time;
+    glm::mat4 view;                         // 64 bytes
+    glm::mat4 proj;                         // 64 bytes
+    alignas(8) glm::vec2 screenResolution;  // 8 bytes (aligned to 8)
+    alignas(16) glm::vec3 cameraPos;        // 12 bytes (aligned to 16)
+    float time;                             // 4 bytes
 };
+
 
 struct PushConstants
 {

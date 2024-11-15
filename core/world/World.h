@@ -9,6 +9,7 @@ class World {
 private:
     Player player;
     std::vector<Actor> worldActors;
+    std::vector<const Object> worldObjects;
     
 public:
     World();
@@ -19,9 +20,10 @@ public:
     Player* getPlayerAsRef();
     
     const std::vector<Actor>& getWorldActors() { return worldActors; }
+    const std::vector<const Object>& getWorldObjects() { return worldObjects; }
     
 private:
-    void pushActor(Actor& newActor);
+    Actor* createActor(const Object& obj, const Transform& transform);
     
 };
 

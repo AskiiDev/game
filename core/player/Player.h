@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "Actor.h"
 #include <glm/glm.hpp>
 #include <array>
 
@@ -13,74 +14,20 @@ enum Direction
     MV_RIGHT = (1 << 3)
 };
 
-
-struct Camera
-{
-    glm::vec3 worldLocation;
-    glm::vec3 forwardVector;
-    glm::vec3 upVector;
-    glm::vec3 rightVector;
-    glm::vec3 worldUpVector;
-    
-    glm::mat4 viewMatrix;
-    glm::mat4 projMatrix;
-    
-    std::array<std::array<float, 4>, 6> planes;
-    
-    double yaw;
-    double pitch;
-    
-    const glm::mat4 getViewProjMatrix()
-    {
-        return projMatrix * viewMatrix;
-    }
-};
-
-
-class Player {
+class Player : public Actor {
 public:
     uint8_t mvDirection = 0;
     
 private:
     glm::vec3 playerVelocity = glm::vec3(0, 0, 0);
-    float acceleration = 5.0f;
-    float deceleration = 15.0f;
     float playerSpeed = 1.4f;
     
-    double cameraPitchMin = -87.;
-    double cameraPitchMax = 80.;
-    
-    Camera camera;
-    
 public:
-    Player();
-    void init();
-    
-    Camera getCamera() { return camera; }
-    
-    void setProjectionMatrix(const glm::mat4& proj);
-    
-    void addCameraYaw(const float yaw);
-    void addCameraPitch(const float pitch);
-    
-    void updateCameraVectors();
+    Player(const Object& o, const Transform& t);
     
     glm::vec3 getPlayerVelocity();
-    glm::vec3 getPlayerLocation() const;
-    
-    glm::vec3 addPlayerVelocity(const glm::vec3& velocity);
+
     void setPlayerVelocity(const glm::vec3& velocity);
-    
-    void movePlayer(const glm::vec3& newLocation);
-    
-    glm::vec3 predictNextPlayerLocation(const glm::vec3& deltaLocation, const double deltaTime);
-    
-    
-    // testing
-//    int jumpFrames = 0;
-//    int gravFrames = 0;
-//    
-//    void jump();
 };
 
 #endif

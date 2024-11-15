@@ -12,7 +12,7 @@
 struct Vertex {
     glm::vec3 pos;
     glm::vec3 color;
-    glm::vec3 normal;
+//    glm::vec3 normal;
     glm::vec2 texCoord;
     uint8_t texIndex;
 
@@ -26,9 +26,9 @@ struct Vertex {
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 5> getAttributeDescriptions()
+    static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions()
     {
-        std::array<VkVertexInputAttributeDescription, 5> attributeDescriptions{};
+        std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
@@ -50,10 +50,10 @@ struct Vertex {
         attributeDescriptions[3].format = VK_FORMAT_R8_UINT;
         attributeDescriptions[3].offset = offsetof(Vertex, texIndex);
         
-        attributeDescriptions[4].binding = 0;
-        attributeDescriptions[4].location = 4;
-        attributeDescriptions[4].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescriptions[4].offset = offsetof(Vertex, normal);
+//        attributeDescriptions[4].binding = 0;
+//        attributeDescriptions[4].location = 4;
+//        attributeDescriptions[4].format = VK_FORMAT_R32G32B32_SFLOAT;
+//        attributeDescriptions[4].offset = offsetof(Vertex, normal);
 
         return attributeDescriptions;
     }
@@ -86,6 +86,21 @@ struct BoundingBox {
     {
         return glm::distance(min, max);
     }
+    
+    bool operator==(const BoundingBox& other) const
+    {
+        if (min != other.min)
+        {
+            return false;
+        }
+        
+        if (max != other.max)
+        {
+            return false;
+        }
+        
+        return true;
+    }
 };
 
 
@@ -93,8 +108,33 @@ struct Object
 {
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;
-    uint8_t textureID;
+    const char* texture;
     BoundingBox boundingBox;
+    
+    bool operator==(const Object& other) const
+    {
+        if (vertices != other.vertices)
+            return false;
+
+        if (indices != other.indices)
+            return false;
+
+        if (texture == nullptr || other.texture == nullptr)
+        {
+            if (texture != other.texture)
+                return false;
+        }
+        
+        else if (std::strcmp(texture, other.texture) != 0)
+        {
+            return false;
+        }
+
+        if (!(boundingBox == other.boundingBox))
+            return false;
+
+        return true;
+    }
 };
 
 
@@ -137,7 +177,7 @@ const std::vector<const char*> deviceExtensions =
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-Object loadObject(const char* filename, uint8_t textureID);
+Object loadObject(const char* model, const char* texture);
 BoundingBox generateBoundingBox(const std::vector<Vertex>& vertices);
 
 bool checkValidationLayerSupport();
