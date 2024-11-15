@@ -403,7 +403,7 @@ void RenderPipeline::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 
     for (size_t i = 0; i < actors.size(); i++)
     {
-        const Actor& a = actors[i];
+        const Actor& a = *actors[i];
         
         if (a.getCulled())
         {

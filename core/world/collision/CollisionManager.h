@@ -65,7 +65,7 @@ bool doesActorCollideWithActor(
  */
 void collideWorldActors(
     const glm::vec3& playerLocation,
-    std::vector<Actor>& worldActors
+    std::vector<Actor*>& worldActors
 )
 {
     DetailedCollisionResponse collisionResult;
@@ -73,11 +73,11 @@ void collideWorldActors(
     
     for (size_t i = 0; i < worldActors.size(); i++)
     {
-        Actor& actorA = worldActors[i];
+        Actor& actorA = *worldActors[i];
         
         for (size_t j = 0; j < worldActors.size(); j++)
         {
-            Actor& actorB = worldActors[j];
+            Actor& actorB = *worldActors[j];
             
             if (&actorA == &actorB)
             {

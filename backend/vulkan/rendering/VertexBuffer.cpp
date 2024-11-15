@@ -24,9 +24,9 @@ void VertexBuffer::populateBuffers()
     uint32_t vertexOffset = 0;
     uint32_t indexOffset = 0;
 
-    for (const Actor& a : world->getWorldActors())
+    for (const Actor* a : world->getWorldActors())
     {
-        Object obj = a.getObject();
+        Object obj = a->getObject();
 
         vertexOffsets.push_back(vertexOffset);
         indexOffsets.push_back(indexOffset);

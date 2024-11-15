@@ -4,17 +4,39 @@
 #include <GLFW/glfw3.h>
 
 
-World::World() : player(loadObject("res/models/barrel.obj", "res/models/barrel.png"), { glm::vec3(0.f, 0.f, -5.f), glm::vec3(-0.f, 0.f, 0.f), glm::vec3(4.f) })
+World::World()
 {
-    worldActors.push_back(player);
-    worldObjects.push_back(player.getObject());
 }
 
+World::~World()
+{
+    for (Actor* actor : worldActors)
+    {
+        delete actor;
+    }
+    
+    worldActors.clear();
+}
 
 void World::load()
 {
     Transform t;
     Object o;
+    
+    
+    o = loadObject("res/models/barrel.obj", "res/models/barrel.png");
+    t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(-0.f, 0.f, 0.f), glm::vec3(4.f) };
+    
+    worldActors.push_back(new Player(o, t));
+    worldObjects.push_back(o);
+    
+    player = dynamic_cast<Player*>(worldActors.back());
+    
+    if (player == nullptr)
+    {
+        throw std::runtime_error("oops");
+    }
+    
 
     o = loadObject("res/models/cube.obj", "res/models/crate.jpg");
     t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(-0.f, 0.f, 0.f), glm::vec3(4.f) };
@@ -50,18 +72,15 @@ void World::load()
 
 void World::update(const double deltaTime)
 {
-//    player->getPlayerVelocity();
-//    DEBUG_LogVec3(worldActors[0].getActorVelocity());
-//    worldActors[0].setActorVelocity(glm::vec3(player.getPlayerVelocity().x, worldActors[0].getActorVelocity().y, player.getPlayerVelocity().z));
-
+    player->getPlayerVelocity();
 
     // update actors
-    for (Actor& actor : worldActors)
+    for (Actor* actor : worldActors)
     {
-        if (actor.getActive())
+        if (actor->getActive())
         {
             collideWorldActors(glm::vec3(0), worldActors);
-            actor.update(deltaTime);
+            actor->update(deltaTime);
         }
     }
     
@@ -104,17 +123,17 @@ void World::update(const double deltaTime)
 
 Player* World::getPlayerAsRef()
 {
-    return &player;
+    return player;
 }
 
 Actor* World::createActor(const Object& obj, const Transform& transform)
 {
-    worldActors.push_back(Actor(obj, transform));
+    worldActors.push_back(new Actor(obj, transform));
     
     if (std::find(worldObjects.begin(), worldObjects.end(), obj) == worldObjects.end())
     {
         worldObjects.push_back(obj);
     }
     
-    return &worldActors.back();
+    return worldActors.back();
 }
