@@ -37,7 +37,6 @@ void World::load()
         throw std::runtime_error("oops");
     }
     
-
     o = loadObject("res/models/cube.obj", "res/models/crate.jpg");
     t = { glm::vec3(0.f, 0.f, -5.f), glm::vec3(-0.f, 0.f, 0.f), glm::vec3(4.f) };
 
@@ -61,10 +60,10 @@ void World::load()
 
     createActor(o, t)->setPhysicsEnabled(true);
     /*--------------*/
-    
+//    
     
     t = { glm::vec3(-3.f, -1.f, -4.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(5.f, 1.f, 5.f) };
-    o = loadObject("res/models/floor.obj", "res/textures/floor/floor4.jpg");
+    o = loadObject("res/models/floor.obj", "res/textures/floor/floor3.jpeg");
     
     createActor(o, t)/*->setCollisionProfile(CW_PLAYER)*/;
 //    /*--------------*/

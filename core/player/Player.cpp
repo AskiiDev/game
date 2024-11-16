@@ -60,8 +60,14 @@ void Player::movePlayerWithInput()
     }
     
     glm::vec3 velocity = desiredMovement * playerSpeed;
-    velocity.y = getActorVelocity().y;
     
     setActorVelocity(velocity);
 }
 
+void Player::jump()
+{
+    if (getGravitationalVelocity() == 0)
+    {
+        setGravitationalVelocity(jumpHeight);
+    }
+}

@@ -192,7 +192,7 @@ void Window::handleKeyboardInput(int key, int scancode, int action, int mods)
         
         if (key == GLFW_KEY_SPACE)
         {
-//            player->jump();
+            player->jump();
 //            toggleFullscreen();
         }
                 

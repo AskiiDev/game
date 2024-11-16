@@ -43,6 +43,8 @@ void main() {
     float sunAngle = timeOfDay * 2;
     
     vec3 lightDir = normalize(vec3(sin(sunAngle), cos(sunAngle), cos(sunAngle)));
+//    vec3 lightDir = normalize(cameraPos - fragPos);
+    
     vec3 lightColor = mix(dayColor, nightColor, sin(timeOfDay) * sin(timeOfDay));
 
     

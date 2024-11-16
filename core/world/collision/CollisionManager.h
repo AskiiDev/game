@@ -108,7 +108,10 @@ void collideWorldActors(
                 
                 if (collisionResult.penetrationInfo.collisionNormal.y > 0.f)
                 {
-                    actorA.setGravitationalVelocity(0.f);
+                    if (actorA.getGravitationalVelocity() < 0.f)
+                    {
+                        actorA.setGravitationalVelocity(0.f);
+                    }
                 }
             }
         }

@@ -18,6 +18,7 @@ class Player : public Actor {
 private:
     uint8_t movementDirection = 0;
     float playerSpeed = 1.4f;
+    uint8_t jumpHeight = 7;
     
 public:
     Player(const Object& o, const Transform& t);
@@ -27,6 +28,8 @@ public:
     void setMovementDirection(const Direction direction);
     void addMovementDirection(const Direction direction);
     void removeMovementDirection(const Direction direction);
+    
+    void jump();
 };
 
 #endif

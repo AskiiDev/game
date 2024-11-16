@@ -21,7 +21,11 @@ void Actor::update(const double dt)
     
     if (physicsEnabled)
     {
-        actorVelocity.y += gravitationalAcceleration;
+        gravitationalVelocity += gravitationalAcceleration;
+        actorVelocity = movementVelocity + glm::vec3(0, gravitationalVelocity, 0);
+        
+        
+//        std::cout << actorVelocity.y << std::endl;
         addActorLocationContinuous(actorVelocity);
     }
 }
@@ -129,7 +133,7 @@ void Actor::addActorScale(const glm::vec3& addScale)
 
 void Actor::setActorVelocity(const glm::vec3 &velocity)
 {
-    actorVelocity = velocity;
+    movementVelocity = velocity;
 }
 
 void Actor::setGravitationalAcceleration(const float acceleration)
@@ -139,7 +143,7 @@ void Actor::setGravitationalAcceleration(const float acceleration)
 
 void Actor::setGravitationalVelocity(const float velocity)
 {
-    actorVelocity.y = velocity;
+    gravitationalVelocity = velocity;
 }
 
 void Actor::setCulled(const bool occlude)

@@ -8,6 +8,9 @@
 class Actor {
 private:
     glm::vec3 actorVelocity = glm::vec3(0);
+    glm::vec3 movementVelocity = glm::vec3(0);
+    float gravitationalVelocity = 0;
+    
     BoundingBox cachedBoundingBox;
     
     float gravitationalAcceleration = -0.3;
@@ -42,6 +45,7 @@ public:
     glm::vec3 getWorldScale() const;
     
     glm::vec3 getActorVelocity() const;
+    float getGravitationalVelocity() const { return gravitationalVelocity; }
     
     glm::mat4 getModelMatrix() const;
     
