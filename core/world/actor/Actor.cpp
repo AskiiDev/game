@@ -24,9 +24,17 @@ void Actor::update(const double dt)
         gravitationalVelocity += gravitationalAcceleration;
         actorVelocity = movementVelocity + glm::vec3(0, gravitationalVelocity, 0);
         
-        
-//        std::cout << actorVelocity.y << std::endl;
         addActorLocationContinuous(actorVelocity);
+        
+        movementVelocity *= 0.8f;
+        
+        actualActorVelocity = (worldTransform.worldLocation - lastWorldLocation) / deltaTime;
+        lastWorldLocation = worldTransform.worldLocation;
+    }
+    
+    if (glm::length(actualActorVelocity) < 0.01f)
+    {
+        removeCollisionPartners();
     }
 }
 
@@ -35,13 +43,7 @@ void Actor::cacheBoundingBox()
     cachedBoundingBox = calculateBoundingBox();
 }
 
-glm::vec3 Actor::getWorldLocation() const { return worldTransform.worldLocation; }
-glm::vec3 Actor::getWorldRotation() const { return worldTransform.worldRotation; }
-glm::vec3 Actor::getWorldScale() const { return worldTransform.worldScale; }
-
-glm::vec3 Actor::getActorVelocity() const { return actorVelocity; }
-
-glm::mat4 Actor::getModelMatrix() const
+const glm::mat4 Actor::getModelMatrix() const
 {
     glm::mat4 model = glm::mat4(1.f);
     
@@ -57,7 +59,7 @@ glm::mat4 Actor::getModelMatrix() const
 }
 
 
-glm::vec3 Actor::getForwardVector() const
+const glm::vec3 Actor::getForwardVector() const
 {
     glm::vec3 direction;
     
@@ -68,7 +70,7 @@ glm::vec3 Actor::getForwardVector() const
     return glm::normalize(direction);
 }
 
-glm::vec3 Actor::getRightVector() const
+const glm::vec3 Actor::getRightVector() const
 {
     glm::vec3 forward = getForwardVector();
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -76,18 +78,12 @@ glm::vec3 Actor::getRightVector() const
     return glm::normalize(glm::cross(forward, up));
 }
 
-glm::vec3 Actor::getUpVector() const
+const glm::vec3 Actor::getUpVector() const
 {
     glm::vec3 forward = getForwardVector();
     glm::vec3 right = getRightVector();
     
     return glm::normalize(glm::cross(right, forward));
-}
-
-
-Object Actor::getObject() const
-{
-    return obj;
 }
 
 
@@ -131,9 +127,15 @@ void Actor::addActorScale(const glm::vec3& addScale)
     setActorScale(worldTransform.worldScale + addScale * deltaTime);
 }
 
-void Actor::setActorVelocity(const glm::vec3 &velocity)
+void Actor::setMovementVelocity(const glm::vec3 &velocity)
 {
     movementVelocity = velocity;
+    removeCollisionPartners();
+}
+
+void Actor::setActorVelocity(const glm::vec3& velocity)
+{
+    actorVelocity = velocity;
 }
 
 void Actor::setGravitationalAcceleration(const float acceleration)
@@ -171,13 +173,12 @@ void Actor::setPhysicsEnabled(const bool enabled)
     physicsEnabled = enabled;
 }
 
-BoundingBox Actor::getBoundingBox() const
+void Actor::setAudioManager(AudioManager* am)
 {
-    return cachedBoundingBox;
+    audioManager = am;
 }
 
-
-BoundingBox Actor::calculateBoundingBox() const
+const BoundingBox Actor::calculateBoundingBox() const
 {
     BoundingBox box = obj.boundingBox;
 
@@ -214,7 +215,7 @@ BoundingBox Actor::calculateBoundingBox() const
 }
 
 
-std::vector<glm::vec3> Actor::getBoundingBoxCorners() const
+const std::vector<glm::vec3> Actor::getBoundingBoxCorners() const
 {
     BoundingBox box = getBoundingBox();
     
@@ -234,7 +235,7 @@ std::vector<glm::vec3> Actor::getBoundingBoxCorners() const
 }
 
 
-float Actor::getApproximateBoundingRadius() const
+const float Actor::getApproximateBoundingRadius() const
 {
     BoundingBox box = getBoundingBox();
     
@@ -244,7 +245,17 @@ float Actor::getApproximateBoundingRadius() const
     return glm::max(max.x - min.x, glm::max(max.y - min.y, max.z - min.z)) / 2.0f;
 }
 
-
-void Actor::onActorCollision(const DetailedCollisionResponse& collisionResult)
+void Actor::removeCollisionPartners()
 {
+    for (auto& pair : collisionPartners)
+    {
+        pair.first->collisionPartners.erase(this);
+    }
+    
+    collisionPartners.clear();
+}
+
+void Actor::onActorCollision(Actor* otherActor, const DetailedCollisionResponse& collisionResult)
+{
+    collisionPartners[otherActor] = collisionResult;
 }

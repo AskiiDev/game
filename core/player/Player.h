@@ -3,6 +3,7 @@
 
 #include "Actor.h"
 #include <glm/glm.hpp>
+#include <unordered_map>
 #include <array>
 
 enum Direction
@@ -17,17 +18,34 @@ enum Direction
 class Player : public Actor {
 private:
     uint8_t movementDirection = 0;
-    float playerSpeed = 1.4f;
     uint8_t jumpHeight = 7;
+    float playerSpeed = 2;
+    
+    const glm::vec3 cameraOffset = glm::vec3(1, 2, 1);
+    const float projectionDistance = 120.f;
+    
+    /*-----------------------*/
+    
+    glm::mat4 viewMatrix;
+    glm::mat4 projectionMatrix;
     
 public:
     Player(const Object& o, const Transform& t);
+    
     
     void movePlayerWithInput();
     
     void setMovementDirection(const Direction direction);
     void addMovementDirection(const Direction direction);
     void removeMovementDirection(const Direction direction);
+    
+    const glm::vec3 calculateProjectionOffset() const;
+    const glm::vec3& getCameraOffset() const { return cameraOffset; }
+    const glm::mat4& getViewMatrix() const { return viewMatrix; };
+    const glm::mat4& getProjectionMatrix() const { return projectionMatrix; };
+    
+    void setViewMatrix(const glm::mat4& vm);
+    void setProjectionMatrix(const glm::mat4& pm);
     
     void jump();
 };

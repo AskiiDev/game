@@ -3,73 +3,84 @@
 
 #include "VulkanUtils.h"
 #include "CollisionData.h"
+#include "AudioManager.h"
 
 
 class Actor {
 private:
-    glm::vec3 actorVelocity = glm::vec3(0);
-    glm::vec3 movementVelocity = glm::vec3(0);
-    float gravitationalVelocity = 0;
-    
-    BoundingBox cachedBoundingBox;
-    
-    float gravitationalAcceleration = -0.3;
-    float deltaTime = 0.f;
-    
-    bool physicsEnabled = false;
-    
-protected:
+    // Object
     Transform worldTransform;
     Object obj;
-    
+
+    // Movement
+    glm::vec3 actorVelocity = glm::vec3(0);
+    glm::vec3 movementVelocity = glm::vec3(0);
+    glm::vec3 lastWorldLocation = glm::vec3(0);
+    glm::vec3 actualActorVelocity = glm::vec3(0);
+
+    // Object collision data
+    BoundingBox cachedBoundingBox;
     CollisionProfile collisionProfile = CollisionProfile::CW_DEFAULT;
     CollisionSurface collisionSurface;
-    
+
+    // Physics
+    bool physicsEnabled = false;
+    float deltaTime = 0.f;
+    float gravitationalVelocity = 0;
+    float gravitationalAcceleration = -0.3;
+
+    // State flags
     bool isCulled = false;
     bool isActive = true;
-    
     bool activityOverride = false;
     
-public:
+protected:
+    AudioManager* audioManager;
     
+    std::unordered_map<Actor*, DetailedCollisionResponse> collisionPartners;
+    
+public:
     Actor(const Object& o, const Transform& t);
     Actor(const Object& o, const Transform& t, const CollisionProfile& cp);
     virtual ~Actor() = default;
     
-    void update(const double deltaTime);
+    virtual void update(const double deltaTime);
     
-
+    
     // Getters
-    glm::vec3 getWorldLocation() const;
-    glm::vec3 getWorldRotation() const;
-    glm::vec3 getWorldScale() const;
+    const glm::vec3& getWorldLocation() const { return worldTransform.worldLocation; }
+    const glm::vec3& getWorldRotation() const { return worldTransform.worldRotation; }
+    const glm::vec3& getWorldScale() const { return worldTransform.worldScale; }
     
-    glm::vec3 getActorVelocity() const;
-    float getGravitationalVelocity() const { return gravitationalVelocity; }
+    const glm::vec3& getMovementVelocity() const { return movementVelocity; }
+    const glm::vec3& getActorVelocity() const { return actorVelocity; }
+    const glm::vec3& getActualActorVelocity() const { return actualActorVelocity; }
+    const float getGravitationalVelocity() const { return gravitationalVelocity; }
     
-    glm::mat4 getModelMatrix() const;
+    const glm::mat4 getModelMatrix() const;
     
-    glm::vec3 getForwardVector() const;
-    glm::vec3 getRightVector() const;
-    glm::vec3 getUpVector() const;
+    const glm::vec3 getForwardVector() const;
+    const glm::vec3 getRightVector() const;
+    const glm::vec3 getUpVector() const;
     
-    Object getObject() const;
-    
+    const Object& getObject() const { return obj; }
     
     void cacheBoundingBox();
-    BoundingBox getBoundingBox() const;
-    BoundingBox calculateBoundingBox() const;
+    const BoundingBox& getBoundingBox() const { return cachedBoundingBox; }
+    const BoundingBox calculateBoundingBox() const;
     
-    std::vector<glm::vec3> getBoundingBoxCorners() const;
-    float getApproximateBoundingRadius() const;
+    const std::vector<glm::vec3> getBoundingBoxCorners() const;
+    const float getApproximateBoundingRadius() const;
     
-    CollisionProfile getCollisionProfile() const { return collisionProfile; }
-    CollisionSurface getCollisionSurface() const { return collisionSurface; }
+    const CollisionProfile& getCollisionProfile() const { return collisionProfile; }
+    const CollisionSurface& getCollisionSurface() const { return collisionSurface; }
     
-    bool getPhysicsEnabled() const { return physicsEnabled; }
+    const bool getPhysicsEnabled() const { return physicsEnabled; }
     
-    bool getCulled() const { return isCulled; }
-    bool getActive() const { return isActive; }
+    const bool getCulled() const { return isCulled; }
+    const bool getActive() const { return isActive; }
+    
+    const bool getIsInAir() const { return abs(gravitationalVelocity) > 0.01f; }
     
     
     // Setters
@@ -82,6 +93,7 @@ public:
     void addActorRotation(const glm::vec3& addRotation);
     void addActorScale(const glm::vec3& addScale);
     
+    void setMovementVelocity(const glm::vec3& velocity);
     void setActorVelocity(const glm::vec3& velocity);
     
     void setCulled(const bool occlude);
@@ -95,8 +107,12 @@ public:
     void setGravitationalAcceleration(const float acceleration);
     void setGravitationalVelocity(const float velocity);
     
+    void setAudioManager(AudioManager* am);
+    
+    void removeCollisionPartners();
+    
     // Event Hooks
-    void onActorCollision(const DetailedCollisionResponse& collisionResult);
+    virtual void onActorCollision(Actor* otherActor, const DetailedCollisionResponse& collisionResult);
 };
 
 #endif

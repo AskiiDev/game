@@ -113,16 +113,32 @@ bool isBoxInBoundingBox(
 )
 {
     float penetrationDepth = FLT_MAX;
-    glm::vec3 penetrationAxis;
+    glm::vec3 penetrationAxis(0);
     
-    if (!calculatePenetration(X_AXIS, amin.x, amax.x, bmin.x, bmax.x, penetrationDepth, penetrationAxis)) return false;
-    if (!calculatePenetration(Y_AXIS, amin.y, amax.y, bmin.y, bmax.y, penetrationDepth, penetrationAxis)) return false;
-    if (!calculatePenetration(Z_AXIS, amin.z, amax.z, bmin.z, bmax.z, penetrationDepth, penetrationAxis)) return false;
+    if (!calculatePenetration(X_AXIS, amin.x, amax.x, bmin.x, bmax.x, penetrationDepth, penetrationAxis))
+    {
+        return false;
+    }
     
-//    glm::vec3 closestPointA = (amax + amin) * .5f;
-//    glm::vec3 closestPointB = (bmax + bmin) * .5f;
-
-//    calculateBoundingBoxCollisionNormal(closestPoint, bmin, bmax, collisionResult.collisionNormal);
+    if (!calculatePenetration(Y_AXIS, amin.y, amax.y, bmin.y, bmax.y, penetrationDepth, penetrationAxis))
+    {
+        return false;
+    }
+    
+    if (!calculatePenetration(Z_AXIS, amin.z, amax.z, bmin.z, bmax.z, penetrationDepth, penetrationAxis))
+    {
+        return false;
+    }
+    
+    cout << penetrationDepth << endl;
+    
+    // FIX MAGIC NUMBER - gravitational_velocity * delta_time
+    if (penetrationDepth < 0.0045f)
+    {
+        return false;
+    }
+    
+    
     collisionResult.penetrationDepth = (penetrationDepth) * PENETRATION_DEPTH_FORCE;
     collisionResult.collisionNormal = penetrationAxis;
     

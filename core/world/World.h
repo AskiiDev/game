@@ -3,6 +3,7 @@
 
 #include "Actor.h"
 #include "Player.h"
+#include "AudioManager.h"
 
 
 class World {
@@ -15,13 +16,13 @@ public:
     World();
    ~World();
     
-    void load();
+    void load(AudioManager* audioManager);
     void update(const double deltaTime);
     
     Player* getPlayerAsRef();
     
-    const std::vector<Actor*>& getWorldActors() { return worldActors; }
-    const std::vector<const Object>& getWorldObjects() { return worldObjects; }
+    const std::vector<Actor*>& getWorldActors() const { return worldActors; }
+    const std::vector<const Object>& getWorldObjects() const { return worldObjects; }
     
 private:
     Actor* createActor(const Object& obj, const Transform& transform);

@@ -13,7 +13,8 @@ bool doesActorCollideWithActor(
     const glm::vec3& playerLocation,
     const Actor& actorA,
     const Actor& actorB,
-    DetailedCollisionResponse& collisionResult
+    DetailedCollisionResponse& collisionResultA,
+    DetailedCollisionResponse& collisionResultB
 )
 {
     if (&actorA == &actorB)
@@ -41,11 +42,18 @@ bool doesActorCollideWithActor(
     const BoundingBox aBox = actorA.getBoundingBox();
     const BoundingBox bBox = actorB.getBoundingBox();
     
-    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResult.penetrationInfo))
+    if (isBoxInBoundingBox(aBox.min, aBox.max, bBox.min, bBox.max, collisionResultA.penetrationInfo))
     {
-        collisionResult.collisionSurface = actorB.getCollisionSurface();
-        collisionResult.collisionPoint = actorA.getWorldLocation();
-        collisionResult.impactVelocity = actorA.getActorVelocity();
+        collisionResultA.collisionSurface = actorB.getCollisionSurface();
+        collisionResultA.collisionPoint = actorA.getWorldLocation();
+        collisionResultA.impactVelocity = actorA.getActualActorVelocity();
+        
+        if (isBoxInBoundingBox(bBox.min, bBox.max, aBox.min, aBox.max, collisionResultB.penetrationInfo))
+        {
+            collisionResultB.collisionSurface = actorA.getCollisionSurface();
+            collisionResultB.collisionPoint = actorB.getWorldLocation();
+            collisionResultB.impactVelocity = actorB.getActualActorVelocity();
+        }
         
         return true;
     }
@@ -68,8 +76,8 @@ void collideWorldActors(
     std::vector<Actor*>& worldActors
 )
 {
-    DetailedCollisionResponse collisionResult;
-    std::vector<Actor*> collidedActors;
+    DetailedCollisionResponse collisionResultA;
+    DetailedCollisionResponse collisionResultB;
     
     for (size_t i = 0; i < worldActors.size(); i++)
     {
@@ -84,29 +92,30 @@ void collideWorldActors(
                 continue;
             }
             
-            if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResult))
+            if (doesActorCollideWithActor(playerLocation, actorA, actorB, collisionResultA, collisionResultB))
             {
                 if (!actorA.getPhysicsEnabled())
                 {
                     continue;
                 }
                 
-                actorA.onActorCollision(collisionResult);
-                
                 if (actorB.getPhysicsEnabled())
                 {
-                    actorA.addActorLocation((collisionResult.penetrationInfo.penetrationDepth / 2.f) *
-                                            collisionResult.penetrationInfo.collisionNormal);
-                    actorB.addActorLocation((collisionResult.penetrationInfo.penetrationDepth / 2.f) *
-                                            -collisionResult.penetrationInfo.collisionNormal);
+                    actorA.addActorLocation((collisionResultA.penetrationInfo.penetrationDepth / 2.f) *
+                                            collisionResultA.penetrationInfo.collisionNormal);
+                    actorB.addActorLocation((collisionResultB.penetrationInfo.penetrationDepth / 2.f) *
+                                            collisionResultB.penetrationInfo.collisionNormal);
                 }
                 else
                 {
-                    actorA.addActorLocation((collisionResult.penetrationInfo.penetrationDepth) *
-                                            collisionResult.penetrationInfo.collisionNormal);
+                    actorA.addActorLocation((collisionResultA.penetrationInfo.penetrationDepth) *
+                                            collisionResultA.penetrationInfo.collisionNormal);
                 }
                 
-                if (collisionResult.penetrationInfo.collisionNormal.y > 0.f)
+                actorA.onActorCollision(&actorB, collisionResultA);
+                actorB.onActorCollision(&actorA, collisionResultB);
+
+                if (collisionResultA.penetrationInfo.collisionNormal.y > 0.f)
                 {
                     if (actorA.getGravitationalVelocity() < 0.f)
                     {

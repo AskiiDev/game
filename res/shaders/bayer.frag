@@ -1,59 +1,67 @@
 #version 450
-#define MAX_TEXTURES 16
+
+#define MAX_TEXTURES 4
+#define DITHER_STEPS 6
+
+#define GRAIN true
 
 
 const float threshold4x4[16] = float[16](
-    0.0, 8.0, 2.0, 10.0,
-    12.0, 4.0, 14.0, 6.0,
-    3.0, 11.0, 1.0, 9.0,
-    15.0, 7.0, 13.0, 5.0
+    0.0, 12.0, 3.0, 15.0,
+    8.0, 4.0, 11.0, 7.0,
+    2.0, 14.0, 1.0, 13.0,
+    10.0, 6.0, 9.0, 5.0
 );
-
-float bayerDither4x4(vec3 color, int x, int y)
+vec3 bayerDither4x4(vec3 color, vec2 pos)
 {
-    int index = x + y * 4;
-    float threshold = threshold4x4[index] / 16.0;
-    float brightness = dot(vec3(0.2126, 0.7152, 0.0722), color);
-    return step(threshold, brightness);
+    int index = (int(pos.x) & 3) + ((int(pos.y) & 3) << 2);
+    
+    float threshold = threshold4x4[index] * (0.0625f);
+    
+    return floor(color * DITHER_STEPS + threshold) * (1.0 / DITHER_STEPS);
 }
 
-
-const float ambientStrength = 0.0;
-const vec3 lightDir = vec3(0.5, 1, 0);
+const vec3 ambient = vec3(0.1f);
 
 layout(set = 0, binding = 1) uniform sampler texSampler;
 layout(set = 0, binding = 2) uniform texture2D textures[MAX_TEXTURES];
 
 layout(location = 0) in vec3 fragColor;
-layout(location = 1) in vec2 fragTexCoord;
-layout(location = 2) flat in uint texIndex;
-layout(location = 3) in vec3 fragNormal;
+layout(location = 1) in vec3 fragPos;
+layout(location = 2) in vec3 cameraPos;
+layout(location = 3) flat in uint texIndex;
+layout(location = 4) in vec2 fragTexCoord;
+layout(location = 5) in float time;
 
 layout(location = 0) out vec4 outColor;
 
 
-void main()
-{
+const vec3 dayColor = vec3(1.f, 1.f, 1.f);
+const vec3 nightColor = normalize(vec3(1, 1, 1));
+
+void main() {
+    float timeOfDay = /*mod((time / 120.f), 1.f)*/ 2.5f;
+    float sunAngle = timeOfDay * 2;
+    
+    vec3 lightDir = normalize(vec3(sin(sunAngle), cos(sunAngle), cos(sunAngle)));
+    vec3 lightColor = mix(dayColor, nightColor, sin(timeOfDay) * sin(timeOfDay));
+    
     vec3 col = texture(sampler2D(textures[texIndex], texSampler), fragTexCoord).rgb;
+
+    vec3 normal = normalize(cross(dFdy(fragPos), dFdx(fragPos)));
+    vec3 diffuse = (max(dot(normal, lightDir), 0.0) + ambient) * col * lightColor;
     
-    int x = int(gl_FragCoord.x) % 4;
-    int y = int(gl_FragCoord.y) % 4;
+    float distanceFactor = clamp(distance(fragPos.xz, cameraPos.xz) * 0.16f, 0.0, 1.0);
+    diffuse *= 1.f - distanceFactor;
     
+    vec3 finalColor = bayerDither4x4(diffuse * 2, gl_FragCoord.xy);
     
-    vec3 ambient = vec3(ambientStrength);
-    vec3 norm = normalize(fragNormal);
+    float grain = 0.01f;
     
-    vec3 lightDirection = normalize(lightDir);
-    float diff = max(dot(norm, lightDirection), 0.0);
+    if (GRAIN)
+    {
+        grain = fract(sin(dot(fragTexCoord.xy + sin(time), vec2(12.9898f, 78.233f))) * 43758.5453f) * 0.03f;
+    }
     
-    float grain = fract(sin(dot(fragTexCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.03;
-    vec3 diffuse = 1.5 * (diff + ambient) * col;
-    
-    
-    vec3 bayer = vec3(bayerDither4x4(diffuse, x, y));
-    
-    vec3 finalColor = pow(diffuse, vec3(0.7));
-    
-    
-    outColor = vec4(mix(finalColor, vec3(grain), 0.), 1.0);
+    outColor = vec4(finalColor + grain, 1.0);
 }

@@ -5,6 +5,10 @@
 #include <OpenAL/alc.h>
 #include <stdexcept>
 #include <vector>
+#include <chrono>
+#include <future>
+#include <thread>
+
 #include <stdint.h>
 #include "IOUtils.h"
 
@@ -13,7 +17,15 @@
 #define NUM_BUFFERS 12
 
 
-struct WAVHeader {
+struct SourceProperties
+{
+    float pitch;
+    float gain;
+    bool looping;
+};
+
+struct WAVHeader
+{
     char riff[4]; // "RIFF"
     uint32_t fileSize;
     char wave[4]; // "WAVE"
@@ -31,28 +43,43 @@ struct WAVHeader {
 
 
 class AudioManager {
-public:
+private:
     ALuint sources[NUM_SOURCES];
     ALuint buffers[NUM_BUFFERS];
     
-private:
     ALCdevice* device;
     ALCcontext* context;
     
 public:
     AudioManager();
+    
     void init();
     void destroy();
     
-    void playFromSource(uint8_t iD, const std::string& filename);
+    void setSourceProperties(const uint8_t ID, const SourceProperties& properties);
+    void loadSource(const uint8_t ID, const std::string& filename);
+    void stopSource(const uint8_t ID);
+    const std::future<bool> playSource(const uint8_t ID);
     
 private:
     void enumerateDevice();
     void generateBuffers();
     void generateSources();
     
-    void loadPCM(uint8_t iD, const std::string& filename);
+    void Thread_setSourceProperties(const uint8_t ID, const SourceProperties& properties);
+    void Thread_loadSource(const uint8_t ID, const std::string& filename);
+    void Thread_playSource(const uint8_t ID, bool& result);
+    void Thread_stopSource(const uint8_t ID);
     
+    void enqueueTask(const std::function<void()>& task);
+    void run();
+    
+    std::thread audioThread;
+    std::atomic<bool> running = false;
+    
+    std::queue<std::function<void()>> taskQueue;
+    std::mutex queueMutex;
+    std::condition_variable taskCondition;
 };
 
 #endif

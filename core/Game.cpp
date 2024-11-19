@@ -11,13 +11,12 @@ Game::Game()
 
 void Game::run()
 {
-    world.load();
+    initAudio();
+    
+    world.load(&audioManager);
     
     initWindow();
     initVulkan();
-    
-    initAudio();
-//    audioManager.playFromSource(0, "res/sfx/physics/bonk.wav");
     
     mainLoop();
     cleanUp();

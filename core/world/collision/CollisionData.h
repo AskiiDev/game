@@ -1,5 +1,5 @@
-#ifndef COLLISIONPROFILE_H
-#define COLLISIONPROFILE_H
+#ifndef COLLISIONDATA_H
+#define COLLISIONDATA_H
 
 
 /**
@@ -45,6 +45,12 @@ struct CollisionSurface
     float friction = 0.5f;
     
     SurfaceType surfaceType = SurfaceType::DEFAULT;
+    
+    void clear()
+    {
+        friction = 0.5f;
+        surfaceType = SurfaceType::DEFAULT;
+    }
 };
 
 
@@ -53,11 +59,18 @@ struct BasicCollisionResponse
     glm::vec3 collisionNormal;
     float penetrationDepth;
     
-    glm::vec3 getPenetrationNormal() const
+    const glm::vec3 getPenetrationNormal() const
     {
         return collisionNormal * penetrationDepth;
     }
+    
+    void clear()
+    {
+        collisionNormal = glm::vec3(0);
+        penetrationDepth = 0.f;
+    }
 };
+
 
 /**
  * @struct CollisionResult
@@ -73,11 +86,14 @@ struct DetailedCollisionResponse
     glm::vec3 impactVelocity;
     CollisionSurface collisionSurface;
     BasicCollisionResponse penetrationInfo;
+    
+    void clear()
+    {
+        collisionPoint = glm::vec3(0);
+        impactVelocity = glm::vec3(0);
+        collisionSurface.clear();
+        penetrationInfo.clear();
+    }
 };
-
-
-
-
-
 
 #endif

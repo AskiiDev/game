@@ -7,7 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
 
-
 #define ORTHO_HEIGHT 5.f
 
 
@@ -179,18 +178,22 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
 {
     UniformBufferObject ubo{};
 
-//    ubo.view = player->getCamera().viewMatrix;
+//    ubo.view = glm::lookAt(
+//        world->getPlayerAsRef()->getWorldLocation() + glm::vec3(4, 8, 4),
+//        world->getPlayerAsRef()->getWorldLocation(),
+//        glm::vec3(0.0f, 1.0f, 0.0f)
+//    );
+    
     ubo.view = glm::lookAt(
-        world->getPlayerAsRef()->getWorldLocation() + glm::vec3(13),
+        world->getPlayerAsRef()->getWorldLocation() + player->calculateProjectionOffset(),
         world->getPlayerAsRef()->getWorldLocation(),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     
-    
     ubo.cameraPos = world->getPlayerAsRef()->getWorldLocation();
         
 //    ubo.proj = glm::perspective(glm::radians(45.f), swapChain->swapChainExtent.width / (float)
-//                                                    swapChain->swapChainExtent.height, 0.02f, 15.0f);
+//                                                    swapChain->swapChainExtent.height, 0.02f, 200.f);
 
     const float aspectRatio = swapChain->swapChainExtent.width / (float) swapChain->swapChainExtent.height;
     ubo.proj = glm::ortho(
@@ -199,10 +202,13 @@ void RenderPipeline::updateUniformBuffer(uint32_t currentImage)
         -ORTHO_HEIGHT,
          ORTHO_HEIGHT,
          0.01f,
-         32.f
+         200.f
     );
     
     ubo.proj[1][1] *= -1;
+    
+    player->setProjectionMatrix(ubo.proj);
+    player->setViewMatrix(ubo.view);
     
     ubo.time = glfwGetTime();
     

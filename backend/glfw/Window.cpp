@@ -196,30 +196,30 @@ void Window::handleKeyboardInput(int key, int scancode, int action, int mods)
 //            toggleFullscreen();
         }
                 
-        if (key == GLFW_KEY_W)
+        if (key == GLFW_KEY_W || key == GLFW_KEY_UP)
             player->addMovementDirection(Direction::MV_FORWARD);
             
-        if (key == GLFW_KEY_S)
+        if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN)
             player->addMovementDirection(Direction::MV_BACKWARD);
 
-        if (key == GLFW_KEY_A)
+        if (key == GLFW_KEY_A || key == GLFW_KEY_LEFT)
             player->addMovementDirection(Direction::MV_LEFT);
                 
-        if (key == GLFW_KEY_D)
+        if (key == GLFW_KEY_D || key == GLFW_KEY_RIGHT)
             player->addMovementDirection(Direction::MV_RIGHT);
     }
     else if (action == GLFW_RELEASE)
     {
-        if (key == GLFW_KEY_W)
+        if (key == GLFW_KEY_W || key == GLFW_KEY_UP)
             player->removeMovementDirection(Direction::MV_FORWARD);
             
-        if (key == GLFW_KEY_S)
+        if (key == GLFW_KEY_S || key == GLFW_KEY_DOWN)
             player->removeMovementDirection(Direction::MV_BACKWARD);
 
-        if (key == GLFW_KEY_A)
+        if (key == GLFW_KEY_A || key == GLFW_KEY_LEFT)
             player->removeMovementDirection(Direction::MV_LEFT);
                 
-        if (key == GLFW_KEY_D)
+        if (key == GLFW_KEY_D || key == GLFW_KEY_RIGHT)
             player->removeMovementDirection(Direction::MV_RIGHT);
     }
 }

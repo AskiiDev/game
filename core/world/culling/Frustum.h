@@ -3,9 +3,8 @@
 
 
 void frustumCullActors(
-    Player& player,
-    std::vector<Actor>& worldActors
+    const Player* player,
+    std::vector<Actor*>& worldActors
 )
 {
-    
 }
